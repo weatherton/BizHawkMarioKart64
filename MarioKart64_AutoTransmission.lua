@@ -1,4 +1,3 @@
---This Lua script was developed by Drew Weatherton for the BizHawk emulator (additional authors: micro500, adelikat)--
 --Lua script was developed by Drew Weatherton for the BizHawk emulator (additional authors: micro500, adelikat)--
 --NOTE: Script must be stored in the same directory as EmuHawk.exe for some functions to work-------------------------
 --Purpose: Partially automate the process of executing perfect maneuvers in Mario Kart 64-----------------------------
