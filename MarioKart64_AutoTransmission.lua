@@ -195,7 +195,7 @@ function GenerateButton()
         end
 
     elseif Direction == "2.Left" then
-            if Maneuver == "1.Outward MT (fastest)" then
+        if Maneuver == "1.Outward MT (fastest)" then
             FramesQueue[#FramesQueue+1] = "|..|  -65,    0,.................r|"
             FramesQueue[#FramesQueue+1] = "|..|  -20,    0,.................r|"
             FramesQueue[#FramesQueue+1] = "|..|  -20,    0,.................r|"
