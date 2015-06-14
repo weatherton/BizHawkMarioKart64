@@ -1,4 +1,4 @@
---Lua script was developed by Drew Weatherton for the BizHawk emulator (additional authors: micro500, adelikat)--
+--This Lua script was developed by Drew Weatherton for the BizHawk emulator (additional authors: micro500, adelikat)--
 --NOTE: Script must be stored in the same directory as EmuHawk.exe for some functions to work-------------------------
 --Purpose: Partially automate the process of executing perfect maneuvers in Mario Kart 64-----------------------------
 console.clear()
@@ -397,44 +397,10 @@ function ExecuteButton()
     forms.setproperty(ExecuteItemBotButtonHandle, "Enabled", false)
 end
 
---User has clicked the "Waypoints" button
---function WaypointsButton()
-    MainWindow = forms.newform(425, 700, "Mario Kart 64 Waypoints")
-    -- To do: Add button to load / save waypoints
-
-    --Waypoint 1
-    -- To do: Add a button to set the waypoint to current location
-    forms.label(MainWindow, "Waypoint 1: (Comment: ", 5, 6, 118, 18)
-    Waypoint1CommentTextBox = forms.textbox(MainWindow, "Waypoint 1 Name", 250, 18, "", 124, 3, true, true)
-
-    forms.label(MainWindow, "X:", 10, 30, 17, 20)
-    Waypoint1XTextBox = forms.textbox(MainWindow, "0.000000000000000000000", 170, 20, "", 27, 25, true, true)
-
-    forms.label(MainWindow, "Y:", 10, 50, 17, 20)
-    Waypoint1YTextBox = forms.textbox(MainWindow, "0.000000000000000000000", 170, 20, "", 27, 45, true, true)
-
-    forms.label(MainWindow, "Z:", 10, 70, 17, 20)
-    Waypoint1YTextBox = forms.textbox(MainWindow, "0.000000000000000000000", 170, 20, "", 27, 65, true, true)
-
-    forms.label(MainWindow, "Distances:", 200, 25, 60, 20)
-    forms.label(MainWindow, "XY:", 207, 50, 25, 20)
-
-    --    PlayerX=mainmemory.readfloat(Xaddr, true)
-    --    PlayerY=mainmemory.readfloat(Yaddr, true)
-    --    PlayerZ=mainmemory.readfloat(Zaddr, true)
-
-
-    --Waypoint1XYZ = string.format("%.3f", math.sqrt (PlayerX^2+PlayerY^2+PlayerZ^2))
-    --Waypoint1XYTextBox = forms.textbox(MainWindow, "0.000000000000000000000", 170, 20, "", 232, 45, true, true)
-
-    --forms.label(MainWindow, "XYZ:", 200, 70, 32, 20)
-    --Waypoint1XYZTextBox = forms.textbox(MainWindow, Waypoint1XYZ, 170, 20, "", 232, 65, true, true)
-
---end
-
 --User has clicked the "HUD Options" button
 function HudButton()
     MainWindow = forms.newform(225, 100, "HUD Options")
+
 
     --HUD Customizations
     forms.label(MainWindow, "HUD Settings:  (check to exclude)", 10, 6, 240, 18)
@@ -494,11 +460,8 @@ forms.label(MainWindow, "INPUT CATALOG", 96, 120, 93, 15)
 GeneratedTextBox = forms.textbox(MainWindow, "|..|    0,    0,..................|", 255, 565, "", 10, 135, true, true)
 
 
---HUD window creation
+--HUD window creation WORKINGHERE
 HUDButtonHandle = forms.button(MainWindow, "HUD Options", HudButton, 189, 721, 86, 23)
-
---Waypoint window creation
-WaypointButtonHandle = forms.button(MainWindow, "Waypoints", WaypointsButton, 5, 721, 86, 23)
 
 --Textbox for Frame Reference
 forms.label(MainWindow, "Frame v", 281, 30, 45, 13)
