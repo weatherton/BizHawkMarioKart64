@@ -1,4 +1,4 @@
---This Lua script was developed by Drew Weatherton for the BizHawk emulator-------------------------------------------
+--This Lua script was developed by Drew Weatherton for the BizHawk emulator (requires v1.9.4 or later)----------------
 --NOTE: Script must be stored in the same directory as EmuHawk.exe for some functions to work-------------------------
 --Purpose: Establish waypoints to track distance to provide benchmarks for progress-----------------------------------
 
