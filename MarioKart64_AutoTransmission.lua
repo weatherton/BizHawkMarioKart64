@@ -195,7 +195,7 @@ function GenerateButton()
         end
 
     elseif Direction == "2.Left" then
-        if Maneuver == "1.Outward MT (fastest)" then
+            if Maneuver == "1.Outward MT (fastest)" then
             FramesQueue[#FramesQueue+1] = "|..|  -65,    0,.................r|"
             FramesQueue[#FramesQueue+1] = "|..|  -20,    0,.................r|"
             FramesQueue[#FramesQueue+1] = "|..|  -20,    0,.................r|"
@@ -637,14 +637,15 @@ loadstateEventHandle = event.onloadstate(load_state_handler, "load_state_handler
 
 while true do
 
-    if forms.ischecked(CheckboxHUD_Time) == false then
+    --NOTE: I was having an error from the HUD Options check boxes and have commented out that functionality for now
+    --if forms.ischecked(CheckboxHUD_Time) == false then
         local TimerAddr = 0x0DC598
 
         Timer=mainmemory.readfloat(TimerAddr, true)
         gui.text(0,0, "TIME ".. string.format("%.3f", Timer),0x50000000,"orange","topright")
-    end
+    --end
 
-    if forms.ischecked(CheckboxHUD_LapPosition) == false then
+    --if forms.ischecked(CheckboxHUD_LapPosition) == false then
         local LapAddr = 0x164390
         local PathAddr = 0x163288
         local PlaceAddr = 0x18CF99
@@ -653,9 +654,9 @@ while true do
         Path=mainmemory.read_s32_be(PathAddr)
         Place=mainmemory.read_u8(PlaceAddr) + 1
         gui.text(client.borderwidth()+client.bufferwidth()*.25,0, "LAP ".. Lap .. "/3, Path " .. Path .. ", Place " .. Place .. "/8",0x50000000,"purple")
-    end
+    --end
 
-    if forms.ischecked(CheckboxHUD_Coordinates) == false then
+    --if forms.ischecked(CheckboxHUD_Coordinates) == false then
         local Xaddr = 0x0F69A4
         local XvAddr = 0x0F69C4
         local Yaddr = 0x0F69AC
@@ -687,9 +688,9 @@ while true do
         PlayerAGL=(PlayerHeight-GroundHeight-5.317)
         gui.text(360,17, "Z[AGL] " .. string.format("%.2f", PlayerAGL),"black","white","bottomleft")
 
-    end
+    --end
 
-    if forms.ischecked(CheckboxHUD_SpeedState) == false then
+    --if forms.ischecked(CheckboxHUD_SpeedState) == false then
 
         local MTglideAddr = 0x0F6BCB
 
@@ -722,7 +723,7 @@ while true do
         if bit.check(StateF,3) then
             gui.text(client.screenwidth()*.5-55,client.screenheight()*.5 + 30, "OFF GROUND","","red")
         end
-    end
+    --end
     
     -- Detect if this is a lag frame
     isLag = emu.islagged()
