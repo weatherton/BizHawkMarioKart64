@@ -688,20 +688,20 @@ while true do
         PlayerAGL=(PlayerHeight-GroundHeight-5.317)
         gui.text(360,17, "Z[AGL] " .. string.format("%.2f", PlayerAGL),"black","white","bottomleft")
 
-		--Rivals
-		local Rival1Addr = 0x163349
-		local Rival2Addr = 0x16334B
-		
-		characters = {
-			"Mario","Luigi","Yoshi","Toad","DK","Wario","Peach","Bowser"
-		}
-		
-		Rival1=mainmemory.read_u8(Rival1Addr)
-		Rival2=mainmemory.read_u8(Rival2Addr)
+        --Rivals
+        local Rival1Addr = 0x163349
+        local Rival2Addr = 0x16334B
 
-		gui.text(536,17, "R1: " .. characters[Rival1+1],"black","yellow","bottomleft")
-		gui.text(536,2, "R2: " .. characters[Rival2+1],"black","yellow","bottomleft")
-		
+        characters = {
+            "Mario","Luigi","Yoshi","Toad","DK","Wario","Peach","Bowser"
+        }
+	
+        Rival1=mainmemory.read_u8(Rival1Addr)
+        Rival2=mainmemory.read_u8(Rival2Addr)
+
+        gui.text(536,17, "R1: " .. characters[Rival1+1],"black","yellow","bottomleft")
+        gui.text(536,2, "R2: " .. characters[Rival2+1],"black","yellow","bottomleft")
+	
     --end
 
     --if forms.ischecked(CheckboxHUD_SpeedState) == false then
