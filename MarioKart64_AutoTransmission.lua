@@ -809,7 +809,11 @@ while true do
                         to_edit = string.sub(to_edit,0,25) .. "Z" .. string.sub(to_edit,27)
                     end
                     
-                    tableStr = tableStr .. to_edit .. "\r\n"
+                    if (i > 0) then
+                      tableStr = tableStr .. "\r\n"
+                    end
+                    
+                    tableStr = tableStr .. to_edit
                     i = i +1
                 end
                 forms.settext(InputQueueTextBox, tableStr)
