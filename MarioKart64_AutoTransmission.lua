@@ -458,6 +458,7 @@ GenerateButtonHandle = forms.button(MainWindow, "Generate Input", GenerateButton
 --Multi-Line Textbox for Generating Input
 forms.label(MainWindow, "INPUT CATALOG", 96, 120, 93, 15)
 GeneratedTextBox = forms.textbox(MainWindow, "|..|    0,    0,..................|", 255, 565, "", 10, 135, true, true)
+forms.setproperty(GeneratedTextBox, "MaxLength", "1000000000")
 
 
 --HUD window creation WORKINGHERE
@@ -510,6 +511,7 @@ forms.label(MainWindow, "INPUT QUEUE", 305, 9, 150, 15)
 forms.label(MainWindow, "<-Format", 582, 26, 60, 18)
 forms.textbox(MainWindow, "|rP| -XXX, -YYY,UDLRUDLRSZBAudrllr|", 255, 20, "", 328, 24, true, true)
 InputQueueTextBox = forms.textbox(MainWindow, "|..|    0,    0,..................|", 255, 712, "", 328, 44, true, true)
+forms.setproperty(InputQueueTextBox, "MaxLength", "1000000000")
 
 --Execute Input
 ExecuteButtonHandle = forms.button(MainWindow, "Execute Input", ExecuteButton, 585, 44, 55, 712)
