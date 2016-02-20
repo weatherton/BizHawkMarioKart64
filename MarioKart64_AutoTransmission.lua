@@ -522,18 +522,24 @@ FrameReferenceTextBox = forms.textbox(MainWindow, "12345", 50, 712, "", 280, 44,
 
 --Populate the Frame Reference Table
 function PopulateFrameReference()
-    local i = 2
     local LoadFramecount = emu.framecount()
-    local FramecountList
-
-    FramecountList = LoadFramecount
+    local i = 1 
     
-    while i <= 98 do
-        FramecountList = FramecountList .. "\r\n" .. LoadFramecount + i
-        i = i + 2
+    local input_queue = GetInputQueue()
+    console.log(input_queue)
+    
+    while i <= #input_queue do
+        local cur_line = input_queue[i]
+        local input_start = string.find(cur_line, "|")
+        
+        cur_line = string.sub(cur_line, input_start)
+        cur_line = string.format("%06i", (LoadFramecount + (i-1)*2)) .. ":" .. cur_line
+    
+        input_queue[i] = cur_line
+        i = i +1
     end
-
-    forms.settext(FrameReferenceTextBox, FramecountList)
+    
+    SetInputQueue(input_queue)
 end
 
 event.onloadstate(PopulateFrameReference)
@@ -817,6 +823,11 @@ while true do
         
         if (queueIterator < table.getn(InputQueue) + 1) then
             toPut = bizstring.replace(InputQueue[queueIterator], "\n", "")
+            
+            -- Remove the frame number and comments if present
+            local input_start = string.find(toPut, "|")
+            toPut = string.sub(toPut, input_start)
+            toPut = string.sub(toPut, 1, 35)
         else
             ClearQueue()
         end
