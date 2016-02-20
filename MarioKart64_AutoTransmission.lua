@@ -869,27 +869,10 @@ while true do
                         if (item_we_got == ItemBotWantedItem) then
                             -- We succeeded
                             
-                            local i = 1
-                            local tableStr = ""
-                            
-                            while i <= #InputQueue do
-                                local to_edit = bizstring.replace(InputQueue[i], "\n", "")
-                                
-                                -- store the Z in the right spot in the text box
-                                if (i == ItemBotIteratorSave) then
-                                    to_edit = string.sub(to_edit,0,25) .. "Z" .. string.sub(to_edit,27)
-                                end
-                                
-                                if (i > 1) then
-                                    tableStr = tableStr .. "\r\n"
-                                end
-                                
-                                tableStr = tableStr .. to_edit
-                                i = i +1
-                            end
-                            forms.settext(InputQueueTextBox, tableStr)
-                            
-                            console.log(ItemBotIteratorSave)
+                            local to_edit = bizstring.replace(InputQueue[ItemBotIteratorSave], "\n", "")
+                            to_edit = string.sub(to_edit,0,25) .. "Z" .. string.sub(to_edit,27)
+                            InputQueue[ItemBotIteratorSave] = to_edit
+                            SetInputQueue(InputQueue)
                             
                             -- Clean up the queue
                             ClearQueue()
