@@ -36,7 +36,7 @@ function GenerateButton()
     end
 
     -- Add specific maneuver inputs
-    if Direction == "1.Right" then
+    if Direction == "Right" then
 
         if Maneuver == "1.Outward MT (fastest)" then
             FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
@@ -194,7 +194,7 @@ function GenerateButton()
             end
         end
 
-    elseif Direction == "2.Left" then
+    elseif Direction == "Left" then
             if Maneuver == "1.Outward MT (fastest)" then
             FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
             FramesQueue[#FramesQueue+1] = "|..|  -20,    0,...........A.....r|"
@@ -449,21 +449,21 @@ forms.destroy(HudWindow)
 
 --Generate the User Interface
 ------------INPUTS ARE X,Y,WIDTH,HEIGHT  -- For Text Boxes: WIDTH, HEIGHT, "signed", X, Y-------
-MainWindow = forms.newform(655, 800, "Mario Kart 64 Automatic Transmission v1.10")
+MainWindow = forms.newform(905, 800, "Mario Kart 64 Automatic Transmission v1.10")
 
 -- Blank frames
-forms.label(MainWindow, "Blank leading frames", 28, 8, 105, 18)
 TextBoxBlankLeadingFrames = forms.textbox(MainWindow, "0", 20, 18, "UNSIGNED", 10, 5)
+forms.label(MainWindow, "Blank leading frames", 28, 8, 105, 18)
 
+TextBoxBlankTrailingFrames = forms.textbox(MainWindow, "10", 20, 18, "UNSIGNED", 140, 5)
 forms.label(MainWindow, "Blank trailing frames", 158, 8, 105, 18)
-TextBoxBlankTrailingFrames = forms.textbox(MainWindow, "0", 20, 18, "UNSIGNED", 140, 5)
 
 --Direction dropdown
-LabelDirection = forms.label(MainWindow, "facing", 67, 31, 40, 20)
+LabelDirection = forms.label(MainWindow, "facing", 58, 31, 40, 20)
 a = { }
-a[0] = "1.Right"
-a[1] = "2.Left"
-DirectionDropdown = forms.dropdown(MainWindow, a, 10, 28, 57, 20)
+a[0] = "Left"
+a[1] = "Right"
+DirectionDropdown = forms.dropdown(MainWindow, a, 10, 28, 48, 20)
 
 --Maneuver dropdown
 a = { }
@@ -472,38 +472,48 @@ a[1] = "2.Straight MT (faster)"
 a[2] = "3.Inward MT (fast)"
 a[3] = "4.Classic MT (reliable)"
 a[4] = "5.Shroom Slide"
-ManeuverDropdown = forms.dropdown(MainWindow, a, 110, 28, 131, 20)
+ManeuverDropdown = forms.dropdown(MainWindow, a, 98, 28, 132, 20)
+
+--Turn dropdown
+LabelTurn = forms.label(MainWindow, "glide", 295, 32, 60, 20)
+a = { }
+a[0] = "Straight"
+a[1] = "Turn"
+ManeuverDropdown = forms.dropdown(MainWindow, a, 235, 28, 60, 20)
+
 
 --Shroomslide options
-forms.label(MainWindow, "(Shroom slide parameters:", 5, 57, 130, 18)
+forms.label(MainWindow, "Shroom slide", 12, 57, 67, 14)
+forms.label(MainWindow, "parameters", 14, 68, 66, 14)
+forms.label(MainWindow, "(                       :", 5, 62, 90, 14)
 
-forms.label(MainWindow, "Total frames", 28, 80, 65, 18)
-TextBoxTotalShroomSlideFrames = forms.textbox(MainWindow, "60", 20, 18, "UNSIGNED", 10, 78)
+TextBoxTotalShroomSlideFrames = forms.textbox(MainWindow, "60", 20, 18, "UNSIGNED", 95, 59)
+forms.label(MainWindow, "Total frames", 113, 61, 65, 18)
 
-forms.label(MainWindow, "Inner", 122, 74, 40, 14)
-forms.label(MainWindow, "magnitude", 116, 85, 60, 14)
-TextBoxInnerMagnitude = forms.textbox(MainWindow, "32", 20, 18, "UNSIGNED", 96, 78)
+forms.label(MainWindow, "Outer frames", 282, 55, 67, 14)
+forms.label(MainWindow, "per inner", 287, 66, 60, 14)
+forms.label(MainWindow, ")", 346, 60, 8, 14)
+TextBoxOuterFramesPer = forms.textbox(MainWindow, "1", 20, 18, "UNSIGNED", 260, 59)
 
-forms.label(MainWindow, "Outer frames", 197, 74, 67, 14)
-forms.label(MainWindow, "per inner frame", 202, 85, 60, 14)
-forms.label(MainWindow, ")", 261, 79, 8, 14)
-TextBoxOuterFramesPer = forms.textbox(MainWindow, "1", 20, 18, "UNSIGNED", 175, 78)
+forms.label(MainWindow, "Inner", 207, 55, 40, 14)
+forms.label(MainWindow, "magnitude", 201, 66, 60, 14)
+TextBoxInnerMagnitude = forms.textbox(MainWindow, "32", 20, 18, "UNSIGNED", 181, 59)
 
 --Create Input
-GenerateButtonHandle = forms.button(MainWindow, "Generate Input", GenerateButton, 10, 110, 86, 23)
+GenerateButtonHandle = forms.button(MainWindow, "Generate Input", GenerateButton, 1, 95, 86, 23)
 
 --Multi-Line Textbox for Generating Input
-forms.label(MainWindow, "INPUT CATALOG", 96, 120, 93, 15)
-GeneratedTextBox = forms.textbox(MainWindow, "|..|    0,    0,...........A......|", 255, 565, "", 10, 135, true, true)
+forms.label(MainWindow, "INPUT CATALOG:", 166, 101, 110, 15)
+GeneratedTextBox = forms.textbox(MainWindow, "000001:|..|    0,    0,...........A......|#Comment", 408, 615, "", 1, 118, true, true,"BOTH")
 forms.setproperty(GeneratedTextBox, "MaxLength", "1000000000")
 
 
 --HUD window creation WORKINGHERE
-HUDButtonHandle = forms.button(MainWindow, "HUD Options", HudButton, 189, 721, 86, 23)
+HUDButtonHandle = forms.button(MainWindow, "HUD Options", HudButton, 1, 735, 86, 23)
 
 --Textbox for Frame Reference
-forms.label(MainWindow, "Frame v", 281, 30, 45, 13)
-FrameReferenceTextBox = forms.textbox(MainWindow, "12345", 50, 712, "", 280, 44, true, true)
+--forms.label(MainWindow, "Frame v", 281, 30, 45, 13)
+FrameReferenceTextBox = forms.textbox(MainWindow, "12345", 0, 712, "", 280, 44, true, true)
 
 --Populate the Frame Reference Table
 function PopulateFrameReference()
@@ -539,19 +549,22 @@ itemOptions[10] = "11. Boo"
 itemOptions[11] = "12. Mushroom"
 itemOptions[13] = "14. Triple Mushrooms"
 itemOptions[14] = "15. Super Mushroom"
-ItemSelectionDropdown = forms.dropdown(MainWindow, itemOptions, 468, 2, 120, 20)
+ItemSelectionDropdown = forms.dropdown(MainWindow, itemOptions, 713, 2, 125, 20)
 
-BooModeCheckbox = forms.checkbox(MainWindow, "Boo Mode", 398,0)
+--Item Select Bot Execute
+ExecuteItemBotButtonHandle = forms.button(MainWindow, "Item Bot", ExecuteItemBotButton, 835, 1, 55, 23)
+
+BooModeCheckbox = forms.checkbox(MainWindow, "Boo", 844,20)
 
 --Multi-Line Textbox for Input Queue
-forms.label(MainWindow, "INPUT QUEUE", 305, 9, 150, 15)
-forms.label(MainWindow, "<-Format", 582, 26, 60, 18)
-forms.textbox(MainWindow, "|rP| -XXX, -YYY,UDLRUDLRSZBAudrllr|", 255, 20, "", 328, 24, true, true)
-InputQueueTextBox = forms.textbox(MainWindow, "|..|    0,    0,...........A......|", 255, 712, "", 328, 44, true, true)
+forms.label(MainWindow, "INPUT QUEUE:", 576, 9, 150, 15)
+--forms.label(MainWindow, "<-Format", 682, 26, 60, 18)
+forms.textbox(MainWindow, "Frame#:|rP| -XXX, -YYY,UDLRUDLRSZBAudrllr|#Mnemonic", 409, 20, "", 426, 24, true, true)
+InputQueueTextBox = forms.textbox(MainWindow, "000001:|..|    0,    0,...........A......|#Comment", 409, 712, "", 426, 43, true, true,"BOTH")
 forms.setproperty(InputQueueTextBox, "MaxLength", "1000000000")
 
 --Execute Input
-ExecuteButtonHandle = forms.button(MainWindow, "Execute Input", ExecuteButton, 585, 44, 55, 712)
+ExecuteButtonHandle = forms.button(MainWindow, "Execute Input", ExecuteButton, 834, 44, 55, 713)
 
 RecordButtonHandle = nil
 
@@ -579,7 +592,7 @@ function RecordButton()
   end
 end
 
-RecordButtonHandle = forms.button(MainWindow, "Record Input", RecordButton, 189, 110, 77, 23)
+RecordButtonHandle = forms.button(MainWindow, "Record Input", RecordButton, 334, 95, 77, 23)
 
 function ClearQueue()
     InputQueue = nil
@@ -593,13 +606,13 @@ function CopyInputButton()
     forms.settext(InputQueueTextBox, forms.gettext(GeneratedTextBox))
 end
 
-CopyInputHandle = forms.button(MainWindow, ">", CopyInputButton, 258, 150, 30, 23)
+CopyInputHandle = forms.button(MainWindow, ">", CopyInputButton, 404, 150, 30, 23)
 
 function AppendInputButton()
     forms.settext(InputQueueTextBox, forms.gettext(InputQueueTextBox) .. "\r\n" .. forms.gettext(GeneratedTextBox))
 end
 
-AppendInputHandle = forms.button(MainWindow, ">>", AppendInputButton, 258, 200, 30, 23)
+AppendInputHandle = forms.button(MainWindow, ">>", AppendInputButton, 404, 200, 30, 23)
 
 -- Bot variables
 
@@ -653,9 +666,6 @@ function ExecuteItemBotButton()
         ItemBotState = 0
     end
 end
-
---Item Select Bot Execute
-ExecuteItemBotButtonHandle = forms.button(MainWindow, "Item Bot", ExecuteItemBotButton, 585, 1, 55, 23)
 
 function load_state_handler() 
     if (ItemBotState == -1) then
