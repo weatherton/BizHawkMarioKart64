@@ -397,22 +397,59 @@ function ExecuteButton()
     forms.setproperty(ExecuteItemBotButtonHandle, "Enabled", false)
 end
 
+--For storing hud option states
+Check_LapPosition = true
+Check_Coordinates = true
+Check_Rivals = true
+Check_Time = true
+Check_SpeedState = true
+
+function CheckLapPosition()
+    Check_LapPosition = not Check_LapPosition
+end
+function CheckCoordinates()
+    Check_Coordinates = not Check_Coordinates
+end
+function CheckRivals()
+    Check_Rivals = not Check_Rivals
+end
+function CheckTime()
+    Check_Time = not Check_Time
+end
+function CheckSpeedState()
+    Check_SpeedState = not Check_SpeedState
+end
+
 --User has clicked the "HUD Options" button
 function HudButton()
-    MainWindow = forms.newform(225, 100, "HUD Options")
-
+    HudWindow = forms.newform(225, 140, "HUD Options")
 
     --HUD Customizations
-    forms.label(MainWindow, "HUD Settings:  (check to exclude)", 10, 6, 240, 18)
-    CheckboxHUD_LapPosition = forms.checkbox(MainWindow, "Lap / Position", 10, 21)
-    CheckboxHUD_Coordinates = forms.checkbox(MainWindow, "Coordinates", 10, 40)
-    CheckboxHUD_Time = forms.checkbox(MainWindow, "Time", 120, 21)
-    CheckboxHUD_SpeedState = forms.checkbox(MainWindow, "Speed / State", 120, 40)
+    forms.label(HudWindow, "HUD Settings: (Uncheck to hide)", 10, 6, 240, 18)
+    CheckboxHUD_LapPosition = forms.checkbox(HudWindow, "Lap / Position", 10, 21)
+    CheckboxHUD_Coordinates = forms.checkbox(HudWindow, "Coordinates", 10, 40)
+    CheckboxHUD_Rivals = forms.checkbox(HudWindow, "Rivals", 10, 62)
+    CheckboxHUD_Time = forms.checkbox(HudWindow, "Time", 120, 21)
+    CheckboxHUD_SpeedState = forms.checkbox(HudWindow, "Speed / State", 120, 40)
+    
+    forms.setproperty(CheckboxHUD_LapPosition, "Checked", Check_LapPosition)
+    forms.setproperty(CheckboxHUD_Coordinates, "Checked", Check_Coordinates)
+    forms.setproperty(CheckboxHUD_Rivals, "Checked", Check_Rivals)
+    forms.setproperty(CheckboxHUD_Time, "Checked", Check_Time)
+    forms.setproperty(CheckboxHUD_SpeedState, "Checked", Check_SpeedState)
+    
+    forms.addclick(CheckboxHUD_LapPosition, CheckLapPosition)
+    forms.addclick(CheckboxHUD_Coordinates, CheckCoordinates)
+    forms.addclick(CheckboxHUD_Rivals, CheckRivals)
+    forms.addclick(CheckboxHUD_Time, CheckTime)
+    forms.addclick(CheckboxHUD_SpeedState, CheckSpeedState)
 end
+HudButton()
+forms.destroy(HudWindow)
 
 --Generate the User Interface
 ------------INPUTS ARE X,Y,WIDTH,HEIGHT  -- For Text Boxes: WIDTH, HEIGHT, "signed", X, Y-------
-MainWindow = forms.newform(655, 800, "Mario Kart 64 Automatic Transmission v1.00")
+MainWindow = forms.newform(655, 800, "Mario Kart 64 Automatic Transmission v1.10")
 
 -- Blank frames
 forms.label(MainWindow, "Blank leading frames", 28, 8, 105, 18)
@@ -639,15 +676,14 @@ loadstateEventHandle = event.onloadstate(load_state_handler, "load_state_handler
 
 while true do
 
-    --NOTE: I was having an error from the HUD Options check boxes and have commented out that functionality for now
-    --if forms.ischecked(CheckboxHUD_Time) == false then
+    if Check_Time then
         local TimerAddr = 0x0DC598
 
         Timer=mainmemory.readfloat(TimerAddr, true)
         gui.text(0,0, "TIME ".. string.format("%.3f", Timer),"orange",0x50000000,"topright")
-    --end
+    end
 
-    --if forms.ischecked(CheckboxHUD_LapPosition) == false then
+    if Check_LapPosition then
         local LapAddr = 0x164390
         local PathAddr = 0x163288
         local PlaceAddr = 0x18CF99
@@ -656,9 +692,9 @@ while true do
         Path=mainmemory.read_s32_be(PathAddr)
         Place=mainmemory.read_u8(PlaceAddr) + 1
         gui.text(client.borderwidth()+client.bufferwidth()*.25,0, "LAP ".. Lap .. "/3, Path " .. Path .. ", Place " .. Place .. "/8","purple",0x50000000)
-    --end
+    end
 
-    --if forms.ischecked(CheckboxHUD_Coordinates) == false then
+    if Check_Coordinates then
         local Xaddr = 0x0F69A4
         local XvAddr = 0x0F69C4
         local Yaddr = 0x0F69AC
@@ -689,10 +725,20 @@ while true do
         PlayerHeight=mainmemory.readfloat(Zaddr, true)
         PlayerAGL=(PlayerHeight-GroundHeight-5.317)
         gui.text(360,17, "Z[AGL] " .. string.format("%.2f", PlayerAGL),"white","black","bottomleft")
+    end
+    
+    if Check_Rivals then
 
         --Rivals
         local Rival1Addr = 0x163349
         local Rival2Addr = 0x16334B
+
+        characters = {
+            "Mario","Luigi","Yoshi","Toad","DK","Wario","Peach","Bowser"
+        }
+	
+        Rival1=mainmemory.read_u8(Rival1Addr)
+        Rival2=mainmemory.read_u8(Rival2Addr)
 
         characters = {
             "Mario","Luigi","Yoshi","Toad","DK","Wario","Peach","Bowser"
@@ -703,10 +749,9 @@ while true do
 
         gui.text(536,17, "R1: " .. characters[Rival1+1],"yellow","black","bottomleft")
         gui.text(536,2, "R2: " .. characters[Rival2+1],"yellow","black","bottomleft")
+    end
 
-    --end
-
-    --if forms.ischecked(CheckboxHUD_SpeedState) == false then
+    if Check_SpeedState then
 
         local MTglideAddr = 0x0F6BCB
 
@@ -739,7 +784,7 @@ while true do
         if bit.check(StateF,3) then
             gui.text(client.screenwidth()*.5-55,client.screenheight()*.5 + 30, "OFF GROUND","red")
         end
-    --end
+    end
     
     -- Detect if this is a lag frame
     isLag = emu.islagged()
