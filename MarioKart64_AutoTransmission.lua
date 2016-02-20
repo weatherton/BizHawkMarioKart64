@@ -494,7 +494,7 @@ LabelTurn = forms.label(MainWindow, "glide", 295, 32, 60, 20)
 a = { }
 a[0] = "Straight"
 a[1] = "Turn"
-ManeuverDropdown = forms.dropdown(MainWindow, a, 235, 28, 60, 20)
+TurnDropdown = forms.dropdown(MainWindow, a, 235, 28, 60, 20)
 
 
 --Shroomslide options
@@ -571,9 +571,6 @@ itemOptions[11] = "12. Mushroom"
 itemOptions[13] = "14. Triple Mushrooms"
 itemOptions[14] = "15. Super Mushroom"
 ItemSelectionDropdown = forms.dropdown(MainWindow, itemOptions, 713, 2, 125, 20)
-
---Item Select Bot Execute
-ExecuteItemBotButtonHandle = forms.button(MainWindow, "Item Bot", ExecuteItemBotButton, 835, 1, 55, 23)
 
 BooModeCheckbox = forms.checkbox(MainWindow, "Boo", 844,20)
 
@@ -687,6 +684,9 @@ function ExecuteItemBotButton()
         ItemBotState = 0
     end
 end
+
+--Item Select Bot Execute
+ExecuteItemBotButtonHandle = forms.button(MainWindow, "Item Bot", ExecuteItemBotButton, 835, 1, 55, 23)
 
 function load_state_handler() 
     if (ItemBotState == -1) then
