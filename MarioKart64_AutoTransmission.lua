@@ -6,6 +6,26 @@ console.clear()
 local InputQueue = nil
 local queueIterator = nil
 
+function GetInputQueue()
+    return bizstring.split(forms.gettext(InputQueueTextBox), "\r\n")
+end
+
+function SetInputQueue(table_data)
+    local tableStr = ""
+    local i = 1
+
+    while i <= #table_data do
+        if (i > 1) then
+          tableStr = tableStr .. "\r\n"
+        end
+        
+        tableStr = tableStr .. table_data[i]
+        i = i +1
+    end
+    
+    forms.settext(InputQueueTextBox, tableStr)
+end
+
 --User has clicked the "Generate Input" button
 function GenerateButton()
 
@@ -379,19 +399,14 @@ end
 
 --User has clicked the "Execute Input" button
 function ExecuteButton()
-    TextBoxContents = forms.gettext(InputQueueTextBox)
-
     local handle = io.open("MarioKart64_AutoTransmission_InputQueueArchive.txt", "a+")
-    handle:write("\r\n" .. "\r\n" .. os.date("%c") .. "\r\n" .. TextBoxContents)
+    handle:write("\r\n" .. "\r\n" .. os.date("%c") .. "\r\n" .. forms.gettext(InputQueueTextBox))
     handle:close()
 
 
-    InputQueue = bizstring.split(TextBoxContents, "\r\n")
-    if (emu.islagged()) then
-      queueIterator = -1
-    else
-      queueIterator = 0
-    end
+    InputQueue = GetInputQueue()
+    queueIterator = 1
+    
     forms.setproperty(ExecuteButtonHandle, "Enabled", false)
     forms.setproperty(RecordButtonHandle, "Enabled", false)
     forms.setproperty(ExecuteItemBotButtonHandle, "Enabled", false)
@@ -507,18 +522,24 @@ FrameReferenceTextBox = forms.textbox(MainWindow, "12345", 50, 712, "", 280, 44,
 
 --Populate the Frame Reference Table
 function PopulateFrameReference()
-    local i = 2
     local LoadFramecount = emu.framecount()
-    local FramecountList
-
-    FramecountList = LoadFramecount
+    local i = 1 
     
-    while i <= 98 do
-        FramecountList = FramecountList .. "\r\n" .. LoadFramecount + i
-        i = i + 2
+    local input_queue = GetInputQueue()
+    console.log(input_queue)
+    
+    while i <= #input_queue do
+        local cur_line = input_queue[i]
+        local input_start = string.find(cur_line, "|")
+        
+        cur_line = string.sub(cur_line, input_start)
+        cur_line = string.format("%06i", (LoadFramecount + (i-1)*2)) .. ":" .. cur_line
+    
+        input_queue[i] = cur_line
+        i = i +1
     end
-
-    forms.settext(FrameReferenceTextBox, FramecountList)
+    
+    SetInputQueue(input_queue)
 end
 
 event.onloadstate(PopulateFrameReference)
@@ -790,144 +811,133 @@ while true do
     isLag = emu.islagged()
     
     if (RecordState == 1) then
-      if (isLag == false) then
-        forms.settext(GeneratedTextBox, forms.gettext(GeneratedTextBox) .. movie.getinputasmnemonic(emu.framecount()-1) .. "\r\n")
-      end
+        if (isLag == false) then
+            forms.settext(GeneratedTextBox, forms.gettext(GeneratedTextBox) .. movie.getinputasmnemonic(emu.framecount()-1) .. "\r\n")
+        end
     elseif (InputQueue ~= nil) then
         if (isLag == false) then
             queueIterator = queueIterator + 1
+        end
+        
+        local toPut = ""
+        
+        if (queueIterator < table.getn(InputQueue) + 1) then
+            toPut = bizstring.replace(InputQueue[queueIterator], "\n", "")
+            
+            -- Remove the frame number and comments if present
+            local input_start = string.find(toPut, "|")
+            toPut = string.sub(toPut, input_start)
+            toPut = string.sub(toPut, 1, 35)
+        else
+            ClearQueue()
+        end
+        
+        if (ItemBotState >= 0) then
+            if (toPut == "") then
+                -- We failed!
+                
+                -- print out a message?
+                console.log("Item bot ran out of queued input!")
+                
+                -- Re-enable the button
+                forms.settext(ExecuteItemBotButtonHandle, "Item Bot")
+                
+                ItemBotState = -1
+            else
+                -- If looking for the first chance to press z, check now
+                if (ItemBotState == 0) then
+                    -- Read the delay timer value
+                    local delayTimerAddr = 0x165F07
+                    z_delay_timer = memory.read_u8(delayTimerAddr)
+                    
+                    -- Found it, switch states
+                    if (((z_delay_timer == 0 or z_delay_timer == 1) and isLag == true) or forms.ischecked(BooModeCheckbox)) then
+                        -- Make a state here
+                        savestate.save("ItemBotIterator")
+                        
+                        -- Remember what spot we're on in the queue
+                        ItemBotIteratorSave = queueIterator
+                        
+                        -- Change State
+                        ItemBotState = 1
+                    else
+                        -- Still looking
+                    end
+                elseif (ItemBotState == 1) then
+                    if (isLag == false) then
+                        -- We just successfully pressed Z
+
+                        -- Change state to detection mode
+                        ItemBotState = 2
+                    end
+                    
+                -- If waiting to see what item we got, check if its set yet, and if its what we want
+                elseif (ItemBotState == 2) then
+                    item_we_got = memory.read_s8(0x165F5B)
+                    z_delay_timer = memory.read_u8(0x165F07)
+
+                    if (item_we_got > 0 or (z_delay_timer == 255 and forms.ischecked(BooModeCheckbox))) then
+                        if (item_we_got == ItemBotWantedItem) then
+                            -- We succeeded
+                            
+                            local to_edit = bizstring.replace(InputQueue[ItemBotIteratorSave], "\n", "")
+                            to_edit = string.sub(to_edit,0,25) .. "Z" .. string.sub(to_edit,27)
+                            InputQueue[ItemBotIteratorSave] = to_edit
+                            SetInputQueue(InputQueue)
+                            
+                            -- Clean up the queue
+                            ClearQueue()
+                            
+                            -- Load the starting state
+                            savestate.load("ItemBotStartingState")
+                            
+                            -- turn off the bot
+                            ItemBotState = 4
+                            
+                            -- Pause
+                            client.pause()
+                        else
+                            -- We failed
+                            -- load the state
+                            savestate.load("ItemBotIterator")
+                            
+                            -- load the iterator value
+                            queueIterator = ItemBotIteratorSave
+
+                            -- Switch to skip a frame mode
+                            ItemBotState = 3
+                        end
+                    end
+
+                elseif (ItemBotState == 3) then
+                    if (isLag == false) then
+                        -- Save the state
+                        savestate.save("ItemBotIterator")
+
+                        -- Save the iterator
+                        ItemBotIteratorSave = queueIterator
+
+                        -- Switch to hitting state
+                        ItemBotState = 1
+                    end
+                elseif (ItemBotState == 4) then
+                    ItemBotState = -1
+
+                    -- Re-enable the button
+                    forms.settext(ExecuteItemBotButtonHandle, "Item Bot")
+                end
+            end
+            
             if (ItemBotState == 1) then
-                -- Change state to detection mode
-                ItemBotState = 2
-            end
-            
-            if (ItemBotState == 3) then
-               -- Save the state
-               savestate.save("ItemBotIterator")
-               
-               -- Save the iterator
-               ItemBotIteratorSave = queueIterator
-               
-               -- Switch to hitting state
-               ItemBotState = 1
-            end
-            --console.log("Non-lag frame, incrementing index")
-        else
-            --console.log("lag frame, keeping previous index")
-        end
-        
-        -- If looking for the first chance to press z, check now
-        if (ItemBotState == 0) then
-            -- Read the delay timer value
-            local delayTimerAddr = 0x165F07
-            z_delay_timer = memory.read_u8(delayTimerAddr)
-            
-            -- Found it, switch states
-            if (((z_delay_timer == 0 or z_delay_timer == 1) and isLag == true) or forms.ischecked(BooModeCheckbox)) then
-                -- Make a state here
-                savestate.save("ItemBotIterator")
-                
-                -- Remember what spot we're on in the queue
-                ItemBotIteratorSave = queueIterator
-                
-                -- Change State
-                ItemBotState = 1
-            else
-                -- Still looking
+                -- Inject the Z to next state
+                toPut = string.sub(toPut,0,25) .. "Z" .. string.sub(toPut,27)
             end
         end
         
-        -- If waiting to see what item we got, check if its set yet, and if its what we want
-        if (ItemBotState == 2) then
-          item_we_got = memory.read_s8(0x165F5B)
-          z_delay_timer = memory.read_u8(0x165F07)
-
-          if (item_we_got > 0 or (z_delay_timer == 255 and forms.ischecked(BooModeCheckbox))) then
-            if (item_we_got == ItemBotWantedItem) then
-                -- We succeeded
-                
-                local i = 0
-                local tableStr = ""
-                while i <= #InputQueue do
-                    local to_edit = bizstring.replace(InputQueue[i], "\n", "")
-                    
-                    -- store the Z in the right spot in the text box
-                    if (i == ItemBotIteratorSave) then
-                        to_edit = string.sub(to_edit,0,25) .. "Z" .. string.sub(to_edit,27)
-                    end
-                    
-                    if (i > 0) then
-                      tableStr = tableStr .. "\r\n"
-                    end
-                    
-                    tableStr = tableStr .. to_edit
-                    i = i +1
-                end
-                forms.settext(InputQueueTextBox, tableStr)
-                
-                -- Clean up the queue
-                ClearQueue()
-                
-                -- Load the starting state
-                savestate.load("ItemBotStartingState")
-                
-                -- turn off the bot
-                ItemBotState = 4
-                
-                -- Pause
-                client.pause()
-            else
-                -- We failed
-                -- load the state
-                savestate.load("ItemBotIterator")
-                
-                -- load the iterator value
-                queueIterator = ItemBotIteratorSave
-
-                -- Switch to skip a frame mode
-                ItemBotState = 3
-            end
-          end
+        if (toPut ~= "") then
+            joypad.setfrommnemonicstr(toPut)
         end
-
-        --console.log("Getting index " .. queueIterator .. " of InputQueue")
-        if (ItemBotState ~= 4) then
-            if (queueIterator < table.getn(InputQueue) + 1) then
-                toPut = bizstring.replace(InputQueue[queueIterator], "\n", "")
-                
-                -- If we're going to press Z
-                if (ItemBotState == 1) then
-                    -- Inject the Z to next state
-                    toPut = string.sub(toPut,0,25) .. "Z" .. string.sub(toPut,27)
-                end
-                
-                --console.log(toPut)
-                    --console.log(forms.gettext(TextBoxItemFrame))
-
-                joypad.setfrommnemonicstr(toPut)
-            else
-                -- We ran out of input, and the bot is running
-                if (ItemBotState >= 0) then
-                  -- We failed!
-                  
-                  -- print out a message?
-                  console.log("Item bot ran out of queued input!")
-                  
-                  -- Re-enable the button
-                  forms.settext(ExecuteItemBotButtonHandle, "Item Bot")
-                  
-                  ItemBotState = -1
-                end
-                
-                --console.log("input queue is done, clearing everything out")
-                ClearQueue()
-            end
-        else
-            ItemBotState = -1
-            
-            -- Re-enable the button
-            forms.settext(ExecuteItemBotButtonHandle, "Item Bot")
-        end
+        
     end
 
     emu.frameadvance()
