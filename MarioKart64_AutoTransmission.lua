@@ -1,5 +1,4 @@
 --This Lua script was developed by Drew Weatherton for the BizHawk emulator (additional authors: micro500, adelikat)--
---NOTE: Script must be stored in the same directory as EmuHawk.exe for some functions to work-------------------------
 --Purpose: Partially automate the process of executing perfect maneuvers in Mario Kart 64-----------------------------
 console.clear()
 
@@ -28,10 +27,10 @@ end
 
 --User has clicked the "Generate Input" button
 function GenerateButton()
-
 --Variables, from Interface:
     Direction = forms.gettext(DirectionDropdown)
     Maneuver = forms.gettext(ManeuverDropdown)
+    GlideType = forms.gettext(GlideDropdown)
     BlankLeadingFrames = tonumber(forms.gettext(TextBoxBlankLeadingFrames))
 
     --Input Catalog Logic-----------------------------------------------------------------
@@ -48,337 +47,100 @@ function GenerateButton()
     FramesQueue = {}
 
     -- Add any desired blank frames to the start
-    local i = 0
+    local CatalogFrameCount = 1
 
-    while i < tonumber(forms.gettext(TextBoxBlankLeadingFrames)) do
-        FramesQueue[#FramesQueue+1] = "|..|    0,    0,...........A......|"
-        i = i + 1
+    while CatalogFrameCount <= tonumber(forms.gettext(TextBoxBlankLeadingFrames)) do
+        FramesQueue[#FramesQueue+1] = string.format("%06i", CatalogFrameCount)..":|..|    0,    0,...........A......|"
+        CatalogFrameCount = CatalogFrameCount + 1
     end
 
     -- Add specific maneuver inputs
-    if Direction == "Right" then
+    if Maneuver == "1.Outward MT (fastest)" then
+        X_Array = {65,20,20,20,-35,65,-65,-65,-60,-60,-60,-60,-60,-60,-60,39,-50,-50,-50,-50,39,-65,-65,-65,-65,-65,-65,-65,-65,-65,-65,63}
+        R_End = 21
+        ManeuverComment = "Outward MT"
 
-        if Maneuver == "1.Outward MT (fastest)" then
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -35,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   63,    0,...........A......|"
+    elseif Maneuver == "2.Straight MT (faster)" then
+        X_Array = {62,20,20,20,-35,64,-60,-60,-60,-60,-60,-60,-60,-60,-60,39,-50,-50,-50,-50,50,-56,-65,-65,-65,-65,-65,-65,-65,-65,-65,-65,61}
+        R_End = 21
+        ManeuverComment = "Straight MT"
 
-        elseif Maneuver == "2.Straight MT (faster)" then
-            FramesQueue[#FramesQueue+1] = "|..|   62,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -35,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   64,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -56,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   61,    0,...........A......|"
+    elseif Maneuver == "3.Inward MT (fast)" then
+        X_Array = {65,65,65,20,20,65,-65,-65,-65,-60,-60,-60,-60,-60,-60,39,-50,-50,-50,-50,40,-55,-65,-65,-65,-65,-65,-65,-65,-65,-65,-65,-65,65}
+        R_End = 21
+        ManeuverComment = "Inward MT"
 
-        elseif Maneuver == "3.Inward MT (fast)" then
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   40,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -55,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
+    elseif Maneuver == "4.Shroom Slide" then
+        OuterFramesPer = tonumber(forms.gettext(TextBoxOuterFramesPer))
+        InnerMagnitude = tonumber(forms.gettext(TextBoxInnerMagnitude))
+        ShroomSlideFrames = tonumber(forms.gettext(TextBoxTotalShroomSlideFrames))
+        X_Array = {}
+        ManeuverComment = "Shroom Slide"
 
-        elseif Maneuver == "4.Classic MT (reliable)" then
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -40,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-        elseif Maneuver == "5.Shroom Slide" then
-
-            OuterFramesPer = tonumber(forms.gettext(TextBoxOuterFramesPer))
-            InnerMagnitude = tonumber(forms.gettext(TextBoxInnerMagnitude))
-            TotalShroomSlideFrames = tonumber(forms.gettext(TextBoxTotalShroomSlideFrames))
-
-            local i = 0
-            while i <= TotalShroomSlideFrames do
-                local j = 0
-                while j < OuterFramesPer do
-                    FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-                    j = j + 1
-                    i = i +1
-                end
-
-                FramesQueue[#FramesQueue+1] = "|..|   ".. InnerMagnitude ..",    0,...........A.....r|"
+        local i = 0
+        while i <= ShroomSlideFrames do
+            local j = 0
+            while j < OuterFramesPer do
+                X_Array[#X_Array+1] = -65
+                j = j + 1
                 i = i +1
             end
+
+            X_Array[#X_Array+1] = InnerMagnitude
+            i = i +1
         end
 
-    elseif Direction == "Left" then
-            if Maneuver == "1.Outward MT (fastest)" then
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   35,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -63,    0,...........A......|"
+        R_End = table.getn(X_Array)
+    end
 
-        elseif Maneuver == "2.Straight MT (faster)" then
-            FramesQueue[#FramesQueue+1] = "|..|  -62,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   35,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -64,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   56,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -61,    0,...........A......|"
+    TableSize = table.getn(X_Array)
 
-        elseif Maneuver == "3.Inward MT (fast)" then
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -20,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   60,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -40,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   55,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-
-        elseif Maneuver == "4.Classic MT (reliable)" then
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   50,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|  -39,    0,...........A.....r|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|   40,    0,...........A......|"
-            FramesQueue[#FramesQueue+1] = "|..|  -65,    0,...........A......|"
-
-        elseif Maneuver == "5.Shroom Slide" then
-
-            OuterFramesPer = tonumber(forms.gettext(TextBoxOuterFramesPer))
-            InnerMagnitude = tonumber(forms.gettext(TextBoxInnerMagnitude))
-            TotalShroomSlideFrames = tonumber(forms.gettext(TextBoxTotalShroomSlideFrames))
-
-            local i = 0
-            while i <= TotalShroomSlideFrames do
-                local j = 0
-                while j < OuterFramesPer do
-                    FramesQueue[#FramesQueue+1] = "|..|   65,    0,...........A.....r|"
-                    j = j + 1
-                    i = i +1
-                end
-
-                FramesQueue[#FramesQueue+1] = "|..|  -".. InnerMagnitude ..",    0,...........A.....r|"
-                i = i +1
-            end
+    -- Make turn glide, if needed
+    if GlideType == "Turn" then
+        X_Array[R_End] = 65
+        
+        i = 1
+        while i <= 10 do
+            X_Array[R_End + i] = 65
+            i = i + 1
         end
+
+        X_Array[R_End + 11] = -55
+
+        TableSize = R_End + 11
+    end
+
+    -- Generate the input in the mnemonic format
+    local MT_Iterator = 1
+    while MT_Iterator <= TableSize do
+
+        X_Value = X_Array[MT_Iterator]
+        if Direction == "Left" then
+            X_Value = -X_Array[MT_Iterator]
+        end
+   
+        FramesQueue[#FramesQueue+1] = string.format("%06i", CatalogFrameCount)..":|..| "
+        FramesQueue[#FramesQueue] = FramesQueue[#FramesQueue]..string.format("%4i", X_Value)
+
+        if MT_Iterator == 1 then
+            FramesQueue[#FramesQueue] = FramesQueue[#FramesQueue]..",    0,...........A.....r|#"..ManeuverComment
+        elseif MT_Iterator <= R_End then
+            FramesQueue[#FramesQueue] = FramesQueue[#FramesQueue]..",    0,...........A.....r|#"
+        else
+            FramesQueue[#FramesQueue] = FramesQueue[#FramesQueue]..",    0,...........A......|#"
+        end
+
+        MT_Iterator = MT_Iterator + 1
+        CatalogFrameCount = CatalogFrameCount + 1
     end
 
     -- Append any desired blank frames to the end
-    local i = 0
+    local BlankTrailingFrameIterator = 0
 
-    while i < tonumber(forms.gettext(TextBoxBlankTrailingFrames)) do
-        FramesQueue[#FramesQueue+1] = "|..|    0,    0,...........A......|"
-        i = i + 1
+    while BlankTrailingFrameIterator < tonumber(forms.gettext(TextBoxBlankTrailingFrames)) do
+        FramesQueue[#FramesQueue+1] = string.format("%06i", CatalogFrameCount)..":|..|    0,    0,...........A......|#"
+        CatalogFrameCount = CatalogFrameCount + 1
+        BlankTrailingFrameIterator = BlankTrailingFrameIterator + 1
     end
 
     -- Convert the FramesQueue table
@@ -399,10 +161,12 @@ end
 
 --User has clicked the "Execute Input" button
 function ExecuteButton()
-    local handle = io.open("MarioKart64_AutoTransmission_InputQueueArchive.txt", "a+")
-    handle:write("\r\n" .. "\r\n" .. os.date("%c") .. "\r\n" .. forms.gettext(InputQueueTextBox))
-    handle:close()
-
+    
+    if forms.ischecked(QueueJournalingCheckBox) == true then
+        local handle = io.open("MarioKart64_InputQueueJournal"..os.date("_%Y-%m-%d")..".txt", "a+")
+        handle:write("\r\n" .. "\r\n" .. os.date("%c") .. "\r\n" .. forms.gettext(InputQueueTextBox))
+        handle:close()
+    end
 
     InputQueue = GetInputQueue()
     queueIterator = 1
@@ -437,13 +201,13 @@ end
 
 --User has clicked the "HUD Options" button
 function HudButton()
-    HudWindow = forms.newform(225, 140, "HUD Options")
+    HudWindow = forms.newform(225, 120, "HUD Options")
 
     --HUD Customizations
     forms.label(HudWindow, "HUD Settings: (Uncheck to hide)", 10, 6, 240, 18)
     CheckboxHUD_LapPosition = forms.checkbox(HudWindow, "Lap / Position", 10, 21)
     CheckboxHUD_Coordinates = forms.checkbox(HudWindow, "Coordinates", 10, 40)
-    CheckboxHUD_Rivals = forms.checkbox(HudWindow, "Rivals", 10, 62)
+    CheckboxHUD_Rivals = forms.checkbox(HudWindow, "Rivals", 10, 59)
     CheckboxHUD_Time = forms.checkbox(HudWindow, "Time", 120, 21)
     CheckboxHUD_SpeedState = forms.checkbox(HudWindow, "Speed / State", 120, 40)
     
@@ -462,9 +226,59 @@ end
 HudButton()
 forms.destroy(HudWindow)
 
+--User has clicked the "Waypoints" button
+function WaypointsButton()
+
+    --This seems to throw a .NET error... not sure why yet
+    dofile("MarioKart64_Waypoints.lua")
+
+end
+
+function SaveInputQueueStateButton()
+    local handle = io.open(forms.gettext(SaveInputQueueFileName)..os.date("_%Y-%m-%d_%H'%M'%S")..".que","w")
+    handle:write(forms.gettext(InputQueueTextBox))
+    handle:close()
+    console.log("Input Queue file saved")
+
+    if forms.ischecked(QueueSavestateCheckbox) == true then
+        savestate.save(forms.gettext(SaveInputQueueFileName)..os.date("_%Y-%m-%d_%H'%M'%S")..".State")
+        console.log("Input Queue save state stored")
+    end 
+end
+
+function OpenInputQueueStateButton()
+    InputQueueDirectory = forms.openfile()
+    LoadedFramesQueue = {}
+
+    if InputQueueDirectory ~= '' then
+        for line in io.lines(InputQueueDirectory) do
+            console.log(line)
+            LoadedFramesQueue[#LoadedFramesQueue+1] = line
+        end
+
+        -- Convert the FramesQueue table
+        local i = 1
+        local LoadedTableStr = ""
+        while i <= #LoadedFramesQueue do
+            if (i > 1) then
+                LoadedTableStr = LoadedTableStr .. "\r\n"
+            end
+            LoadedTableStr = LoadedTableStr .. LoadedFramesQueue[i]
+            i = i +1
+        end
+        -- Verify output to the console
+        -- console.log(LoadedTableStr)
+        -- Output to the Main Window
+        forms.settext(InputQueueTextBox, LoadedTableStr)
+    end
+end
+
+--WaypointsButton()
+--forms.destroy(HudWindow)
+
 --Generate the User Interface
 ------------INPUTS ARE X,Y,WIDTH,HEIGHT  -- For Text Boxes: WIDTH, HEIGHT, "signed", X, Y-------
-MainWindow = forms.newform(905, 800, "Mario Kart 64 Automatic Transmission v1.10")
+MainWindow = forms.newform(905, 800, "Mario Kart 64 Automatic Transmission v1.30")
 
 -- Blank frames
 TextBoxBlankLeadingFrames = forms.textbox(MainWindow, "0", 20, 18, "UNSIGNED", 10, 5)
@@ -476,25 +290,24 @@ forms.label(MainWindow, "Blank trailing frames", 158, 8, 105, 18)
 --Direction dropdown
 LabelDirection = forms.label(MainWindow, "facing", 58, 31, 40, 20)
 a = { }
-a[0] = "Left"
-a[1] = "Right"
+a[1] = "Left"
+a[2] = "Right"
 DirectionDropdown = forms.dropdown(MainWindow, a, 10, 28, 48, 20)
 
 --Maneuver dropdown
 a = { }
-a[0] = "1.Outward MT (fastest)"
-a[1] = "2.Straight MT (faster)"
-a[2] = "3.Inward MT (fast)"
-a[3] = "4.Classic MT (reliable)"
-a[4] = "5.Shroom Slide"
+a[1] = "1.Outward MT (fastest)"
+a[2] = "2.Straight MT (faster)"
+a[3] = "3.Inward MT (fast)"
+a[4] = "4.Shroom Slide"
 ManeuverDropdown = forms.dropdown(MainWindow, a, 98, 28, 132, 20)
 
 --Turn dropdown
-LabelTurn = forms.label(MainWindow, "glide", 295, 32, 60, 20)
+LabelGlide = forms.label(MainWindow, "glide", 295, 32, 60, 20)
 a = { }
-a[0] = "Straight"
-a[1] = "Turn"
-TurnDropdown = forms.dropdown(MainWindow, a, 235, 28, 60, 20)
+a[1] = "Straight"
+a[2] = "Turn"
+GlideDropdown = forms.dropdown(MainWindow, a, 235, 28, 60, 20)
 
 
 --Shroomslide options
@@ -523,12 +336,34 @@ GeneratedTextBox = forms.textbox(MainWindow, "000001:|..|    0,    0,...........
 forms.setproperty(GeneratedTextBox, "MaxLength", "1000000000")
 
 
---HUD window creation WORKINGHERE
+--HUD window creation
 HUDButtonHandle = forms.button(MainWindow, "HUD Options", HudButton, 1, 735, 86, 23)
 
---Textbox for Frame Reference
---forms.label(MainWindow, "Frame v", 281, 30, 45, 13)
-FrameReferenceTextBox = forms.textbox(MainWindow, "12345", 0, 712, "", 280, 44, true, true)
+--Waypoints Button
+forms.button(MainWindow, "Waypoints", WaypointsButton, 135, 735, 86, 23)
+
+--Input Queue Save Button
+forms.button(MainWindow, "Save^", SaveInputQueueStateButton, 426, 735, 50, 23)
+
+--Input Queue Save Name
+SaveInputQueueFileName = forms.textbox(MainWindow, "InputQueueFile",  230, 23, "", 560, 735, true, true)
+
+--Input Queue Save Includes State
+QueueSavestateCheckbox = forms.checkbox(MainWindow, "+ Savestate", 479,735)
+
+--Input Queue Open Button
+forms.button(MainWindow, "Open", OpenInputQueueStateButton, 790, 735, 45, 23)
+
+--Input Queue Journaling
+QueueJournalingCheckBox = forms.checkbox(MainWindow, "Journal to file", 426, 0)
+forms.setproperty(QueueJournalingCheckBox,"Checked",true)
+
+--Coordinate Units
+a = { }
+a[1] = " Meters"
+a[2] = "Game Units"
+UnitsDropdown = forms.dropdown(MainWindow, a, 325, 735, 85, 23)
+forms.label(MainWindow, "Coordinates:", 260, 739, 66, 23)
 
 --Populate the Frame Reference Table
 function PopulateFrameReference()
@@ -570,19 +405,19 @@ itemOptions[10] = "11. Boo"
 itemOptions[11] = "12. Mushroom"
 itemOptions[13] = "14. Triple Mushrooms"
 itemOptions[14] = "15. Super Mushroom"
-ItemSelectionDropdown = forms.dropdown(MainWindow, itemOptions, 713, 2, 125, 20)
+ItemSelectionDropdown = forms.dropdown(MainWindow, itemOptions, 712, 2, 125, 20)
 
-BooModeCheckbox = forms.checkbox(MainWindow, "Boo", 844,20)
+BooModeCheckbox = forms.checkbox(MainWindow, "Boo", 844,23)
 
 --Multi-Line Textbox for Input Queue
 forms.label(MainWindow, "INPUT QUEUE:", 576, 9, 150, 15)
 --forms.label(MainWindow, "<-Format", 682, 26, 60, 18)
 forms.textbox(MainWindow, "Frame#:|rP| -XXX, -YYY,UDLRUDLRSZBAudrllr|#Mnemonic", 409, 20, "", 426, 24, true, true)
-InputQueueTextBox = forms.textbox(MainWindow, "000001:|..|    0,    0,...........A......|#Comment", 409, 712, "", 426, 43, true, true,"BOTH")
+InputQueueTextBox = forms.textbox(MainWindow, "000001:|..|    0,    0,...........A......|#Comment", 409, 690, "", 426, 43, true, true,"BOTH")
 forms.setproperty(InputQueueTextBox, "MaxLength", "1000000000")
 
 --Execute Input
-ExecuteButtonHandle = forms.button(MainWindow, "Execute Input", ExecuteButton, 834, 44, 55, 713)
+ExecuteButtonHandle = forms.button(MainWindow, "Execute Input", ExecuteButton, 834, 46, 55, 688)
 
 RecordButtonHandle = nil
 
@@ -717,12 +552,12 @@ while true do
     if Check_LapPosition then
         local LapAddr = 0x164390
         local PathAddr = 0x163288
-        local PlaceAddr = 0x18CF99
+        local PlaceAddr = 0x1643BB
 
         Lap=mainmemory.read_s32_be(LapAddr) + 1
         Path=mainmemory.read_s32_be(PathAddr)
         Place=mainmemory.read_u8(PlaceAddr) + 1
-        gui.text(client.borderwidth()+client.bufferwidth()*.25,0, "LAP ".. Lap .. "/3, Path " .. Path .. ", Place " .. Place .. "/8","purple",0x50000000)
+        gui.text(client.borderwidth()+client.bufferwidth()*.35,0, "LAP ".. Lap .. "/3, Path " .. Path .. ", Place " .. Place .. "/8",0xFFC758FF,0x50000000)
     end
 
     if Check_Coordinates then
@@ -734,18 +569,32 @@ while true do
         local ZvAddr = 0x0F69C8
         local ZgroundAddr = 0x0F6A04
 
+        UnitsChoice = forms.gettext(UnitsDropdown)
 
-        PlayerX=mainmemory.readfloat(Xaddr, true)
+        if UnitsChoice == " Meters" then
+            Units = 18
+        else
+            Units = 1
+        end
+
+        --A note about units
+        --In-game velocities are multipled by 12 to arrive at the values used for the in-game speedometer (oddly, in-game velocities do not correspond directly
+        -----to game units as traveling for 1 velocity unit per hour for one second results in traveling 60 game units (where a direct relationship would give 3.6)
+        --To convert the coordinate game units to meters, I tested using reverse which is a constant 12.000... km/h on flat ground. At this speed 60.000... game units
+        -----are traveled. 12 km/h is 3.333... m/s so we should be covering (10/3) meters. Thus (10/3) meters = 60 game units and thus 1 meter = (3/10) * 60 = 18 game units
+        -----Thus, to show coordinates in meters we must divide them by 18. This is helpful to do as then velocities and coordinates are provided in km/h and meters respectively
+
+        PlayerX=mainmemory.readfloat(Xaddr, true) / Units
         gui.text(0,17, "X ".. string.format("%.3f", PlayerX),"white","black","bottomleft")
         PlayerXv=mainmemory.readfloat(XvAddr, true) * 12
         gui.text(0,2, "Xv ".. string.format("%.3f", PlayerXv),"white","black","bottomleft")
 
-        PlayerY=mainmemory.readfloat(Yaddr, true)
+        PlayerY=mainmemory.readfloat(Yaddr, true) / Units
         gui.text(120,17, "Y ".. string.format("%.3f", PlayerY),"white","black","bottomleft")
         PlayerYv=mainmemory.readfloat(YvAddr, true) * 12
         gui.text(120,2, "Yv ".. string.format("%.3f", PlayerYv),"white","black","bottomleft")
 
-        PlayerZ=mainmemory.readfloat(Zaddr, true)
+        PlayerZ=mainmemory.readfloat(Zaddr, true) / Units
         gui.text(240,17, "Z ".. string.format("%.3f", PlayerZ),"white","black","bottomleft")
         PlayerZv=mainmemory.readfloat(ZvAddr, true) * 12
         gui.text(240,2, "Zv ".. string.format("%.3f", PlayerZv),"white","black","bottomleft")
@@ -754,7 +603,7 @@ while true do
 
         GroundHeight=mainmemory.readfloat(ZgroundAddr, true)
         PlayerHeight=mainmemory.readfloat(Zaddr, true)
-        PlayerAGL=(PlayerHeight-GroundHeight-5.317)
+        PlayerAGL=(PlayerHeight-GroundHeight-5.317) / Units
         gui.text(360,17, "Z[AGL] " .. string.format("%.2f", PlayerAGL),"white","black","bottomleft")
     end
     
