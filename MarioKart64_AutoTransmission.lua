@@ -1,9 +1,6 @@
---This Lua script was developed by Drew Weatherton for the BizHawk emulator (additional authors: micro500, adelikat)--
---Purpose: Partially automate the process of executing perfect maneuvers in Mario Kart 64-----------------------------
+--This Lua script was developed for the BizHawk emulator, available at github.com/weatherton/BizHawkMarioKart64--
+--Purpose: Partially automate the process of executing perfect maneuvers in Mario Kart 64------------------------
 console.clear()
-
-local InputQueue = nil
-local queueIterator = nil
 
 function GetInputQueue()
     return bizstring.split(forms.gettext(InputQueueTextBox), "\r\n")
@@ -27,7 +24,7 @@ end
 
 --User has clicked the "Generate Input" button
 function GenerateButton()
---Variables, from Interface:
+    --Variables, from Interface:
     Direction = forms.gettext(DirectionDropdown)
     Maneuver = forms.gettext(ManeuverDropdown)
     GlideType = forms.gettext(GlideDropdown)
@@ -153,18 +150,28 @@ function GenerateButton()
         tableStr = tableStr .. FramesQueue[i]
         i = i +1
     end
-    -- Verify output to the console
-    -- console.log(tableStr)
     -- Output to the Main Window
     forms.settext(GeneratedTextBox, tableStr)
 end
 
+local InputQueue = nil
+local queueIterator = nil
+
+--Need to add blanks at the end of these arrays
+ModeArray = {" ","GP","TT","VS","BT"}
+EngineArray = {" ","50","100","150"}
+CourseArray = {" ","MR","CM","BC","BB","YV","FS","KTB","RRy","LR","MMF","TT","KD","SL","RRd","WS","BF","SS","DD","DK","BD","TC"}
+
+SelectedMode = 1
+SelectedEngine = 1
+SelectedCourse = 1
+SelectedPlayers = " "
+
 --User has clicked the "Execute Input" button
 function ExecuteButton()
-    
     if forms.ischecked(QueueJournalingCheckBox) == true then
         local handle = io.open("MarioKart64_InputQueueJournal"..os.date("_%Y-%m-%d")..".txt", "a+")
-        handle:write("\r\n" .. "\r\n" .. os.date("%c") .. "\r\n" .. forms.gettext(InputQueueTextBox))
+        handle:write("\r\n" .. "\r\n" .. os.date("%c") .."["..SelectedMode.."-"..SelectedEngine.."-"..SelectedCourse.."-"..SelectedPlayers.."p] ".. "\r\n" .. forms.gettext(InputQueueTextBox))
         handle:close()
     end
 
@@ -182,6 +189,7 @@ Check_Coordinates = true
 Check_Rivals = true
 Check_Time = true
 Check_SpeedState = true
+Check_MetricsState = true
 
 function CheckLapPosition()
     Check_LapPosition = not Check_LapPosition
@@ -198,6 +206,9 @@ end
 function CheckSpeedState()
     Check_SpeedState = not Check_SpeedState
 end
+function CheckMetricsState()
+    Check_MetricsState = not Check_MetricsState
+end
 
 --User has clicked the "HUD Options" button
 function HudButton()
@@ -210,32 +221,253 @@ function HudButton()
     CheckboxHUD_Rivals = forms.checkbox(HudWindow, "Rivals", 10, 59)
     CheckboxHUD_Time = forms.checkbox(HudWindow, "Time", 120, 21)
     CheckboxHUD_SpeedState = forms.checkbox(HudWindow, "Speed / State", 120, 40)
+    CheckboxHUD_MetricsState = forms.checkbox(HudWindow, "Metrics", 120, 59)
     
     forms.setproperty(CheckboxHUD_LapPosition, "Checked", Check_LapPosition)
     forms.setproperty(CheckboxHUD_Coordinates, "Checked", Check_Coordinates)
     forms.setproperty(CheckboxHUD_Rivals, "Checked", Check_Rivals)
     forms.setproperty(CheckboxHUD_Time, "Checked", Check_Time)
     forms.setproperty(CheckboxHUD_SpeedState, "Checked", Check_SpeedState)
+    forms.setproperty(CheckboxHUD_MetricsState, "Checked", Check_MetricsState)
     
     forms.addclick(CheckboxHUD_LapPosition, CheckLapPosition)
     forms.addclick(CheckboxHUD_Coordinates, CheckCoordinates)
     forms.addclick(CheckboxHUD_Rivals, CheckRivals)
     forms.addclick(CheckboxHUD_Time, CheckTime)
     forms.addclick(CheckboxHUD_SpeedState, CheckSpeedState)
+    forms.addclick(CheckboxHUD_MetricsState, CheckMetricsState)
 end
 HudButton()
 forms.destroy(HudWindow)
 
+WaypointsWindow = forms.newform(482, 700, "Mario Kart 64 Waypoint Dashboard")
+forms.destroy(WaypointsWindow)
+
 --User has clicked the "Waypoints" button
 function WaypointsButton()
+    WaypointsWindow = forms.newform(482, 700, "Mario Kart 64 Waypoint Dashboard")
 
-    --This seems to throw a .NET error... not sure why yet
-    dofile("MarioKart64_Waypoints.lua")
+    WaypointFilename = forms.textbox(WaypointsWindow, "WaypointFile", 366, 18, "", 53, 3, true, true)
+    SaveWaypoint1Handle = forms.button(WaypointsWindow, "Save", SaveWaypoint1Button, 0, 0, 50, 23)
+    OpenWaypoint1Handle = forms.button(WaypointsWindow, "Open", OpenWaypoint1Button, 422, 0, 50, 23)
 
+-- Waypoint 1------------------------------------------------------------------------------------------------------------
+-- Waypoint 1, Point 1
+    forms.label(WaypointsWindow, "____________________________________________________________________________________", 0, 11, 477, 14)
+    
+    forms.label(WaypointsWindow, "Waypoint 1:", 0, 30, 64, 18)
+
+    SetWaypoint1Handle = forms.button(WaypointsWindow, "Set from location", SetWaypoint1Button, 185, 110, 94, 23)
+    SetWaypoint1Handle2 = forms.button(WaypointsWindow, "Set from location", SetWaypoint1Button2, 378, 110, 94, 23)
+    -- Create checkbox for toggling this waypoint's visiblity
+    CheckboxWayline1 = forms.checkbox(WaypointsWindow, "Line segment", 295, 110)
+    -- This starts as visible but is changed to invisible to reveal coordinates for the optional line segment end point
+    Waypoint1Cover2 = forms.label(WaypointsWindow, "", 320, 50, 160, 60)
+    Waypoint1TitleTextBox = forms.textbox(WaypointsWindow, "Waypoint 1", 408, 20, "", 64, 27, true, true)
+
+    Waypoint1XTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 185, 50, false, true)
+    Waypoint1XLabel = forms.label(WaypointsWindow, "X:", 171, 55, 17, 15)
+    Waypoint1X = tonumber(forms.gettext(Waypoint1XTextBox))
+
+    Waypoint1YTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 185, 70, false, true)
+    forms.label(WaypointsWindow, "Y:", 171, 75, 17, 15) 
+    Waypoint1Y = tonumber(forms.gettext(Waypoint1YTextBox))
+
+    Waypoint1ZTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 185, 90, false, true)
+    forms.label(WaypointsWindow, "Z:", 171, 95, 17, 15)
+    Waypoint1Z = tonumber(forms.gettext(Waypoint1ZTextBox))
+
+-- Waypoint 1, Point 2
+    Waypoint1X2TextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 340, 50, false, true)
+    forms.label(WaypointsWindow, "X2:", 320, 55, 24, 15)
+    Waypoint1X2 = tonumber(forms.gettext(Waypoint1X2TextBox))
+
+    Waypoint1Y2TextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 340, 70, false, true)
+    forms.label(WaypointsWindow, "Y2:", 320, 75, 24, 15)
+    Waypoint1Y2 = tonumber(forms.gettext(Waypoint1Y2TextBox))
+
+    Waypoint1Z2TextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 340, 90, false, true)
+    forms.label(WaypointsWindow, "Z2:", 320, 95, 24, 15)
+    Waypoint1Z2 = tonumber(forms.gettext(Waypoint1Z2TextBox))
+
+-- Distances
+    forms.label(WaypointsWindow, "Distances:", 10, 53, 60, 15)
+    Waypoint1XYTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 33, 70, false, true)
+    forms.label(WaypointsWindow, "XY:", 10, 75, 25, 20)
+
+    Waypoint1XYZTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 33, 90, false, true)
+    forms.label(WaypointsWindow, "XYZ:", 3, 95, 32, 20)
+
+    CheckboxWaypoint1OnScreen = forms.checkbox(WaypointsWindow,"On-Screen",40,110)
+    forms.setproperty(CheckboxWaypoint1OnScreen,"Checked",true)
+
+-- Waypoint 2------------------------------------------------------------------------------------------------------------
+-- Waypoint 2, Point 1
+    forms.label(WaypointsWindow, "____________________________________________________________________________________", 0, 123, 477, 14)
+    
+    SetWaypoint2Handle = forms.button(WaypointsWindow, "Set from location", SetWaypoint2Button, 185, 222, 94, 23)
+    Waypoint2TitleTextBox = forms.textbox(WaypointsWindow, "Waypoint 2", 388, 20, "", 84, 139, true, true)
+    CheckboxWaypoint2 = forms.checkbox(WaypointsWindow, "Waypoint 2:", 3, 137)
+    
+    Waypoint2XTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 185, 162, false, true)
+    Waypoint2XLabel = forms.label(WaypointsWindow, "X:", 171, 167, 17, 15)
+    Waypoint2X = tonumber(forms.gettext(Waypoint1XTextBox))
+
+    Waypoint2YTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 185, 182, false, true)
+    forms.label(WaypointsWindow, "Y:", 171, 187, 17, 15) 
+    Waypoint2Y = tonumber(forms.gettext(Waypoint1YTextBox))
+
+    Waypoint2ZTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 185, 202, false, true)
+    forms.label(WaypointsWindow, "Z:", 171, 207, 17, 15)
+    Waypoint2Z = tonumber(forms.gettext(Waypoint1ZTextBox))
+
+-- Waypoint 1, Point 2
+    SetWaypoint2Handle2 = forms.button(WaypointsWindow, "Set from location", SetWaypoint2Button2, 378, 222, 94, 23)
+
+    -- Create checkbox for toggling this waypoint's visiblity
+    CheckboxWayline2 = forms.checkbox(WaypointsWindow, "Line segment", 295, 222)
+    -- This starts as visible but is changed to invisible to reveal coordinates for the optional line segment end point
+    Waypoint2Cover2 = forms.label(WaypointsWindow, "", 320, 162, 160, 60)
+
+    Waypoint2X2TextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 340, 162, false, true)
+    forms.label(WaypointsWindow, "X2:", 320, 167, 24, 15)
+    Waypoint2X2 = tonumber(forms.gettext(Waypoint1X2TextBox))
+
+    Waypoint2Y2TextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 340, 182, false, true)
+    forms.label(WaypointsWindow, "Y2:", 320, 187, 24, 15)
+    Waypoint2Y2 = tonumber(forms.gettext(Waypoint1Y2TextBox))
+
+    Waypoint2Z2TextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 340, 202, false, true)
+    forms.label(WaypointsWindow, "Z2:", 320, 207, 24, 15)
+    Waypoint2Z2 = tonumber(forms.gettext(Waypoint1Z2TextBox))
+
+-- Distances
+    forms.label(WaypointsWindow, "Distances:", 10, 165, 60, 15)
+    Waypoint2XYTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 33, 182, false, true)
+    forms.label(WaypointsWindow, "XY:", 10, 187, 25, 20)
+
+    Waypoint2XYZTextBox = forms.textbox(WaypointsWindow, "0", 132, 20, SIGNED, 33, 202, false, true)
+    forms.label(WaypointsWindow, "XYZ:", 3, 207, 32, 20)
+
+    CheckboxWaypoint2OnScreen = forms.checkbox(WaypointsWindow,"On-Screen",40,222)
+    forms.setproperty(CheckboxWaypoint2OnScreen,"Checked",true)
+end
+
+--User has clicked the "Save" button
+function SaveWaypoint1Button()
+
+    if forms.ischecked(CheckboxWayline1) == true then
+        CheckboxWayline1State = "true"
+    else 
+        CheckboxWayline1State = "false"
+    end
+
+    if forms.ischecked(CheckboxWaypoint2) == true then
+        CheckboxWaypoint2State = "true"
+    else 
+        CheckboxWaypoint2State = "false"
+    end
+
+    if forms.ischecked(CheckboxWayline2) == true then
+        CheckboxWayline2State = "true"
+    else 
+        CheckboxWayline2State = "false"
+    end
+
+    local handle = io.open(forms.gettext(WaypointFilename) .. ".wpt", "w+")
+    handle:write(
+        CheckboxWayline1State .. "\n" ..
+        CheckboxWaypoint2State .. "\n" ..
+        CheckboxWayline2State .. "\n" ..
+
+        forms.gettext(Waypoint1TitleTextBox) .. "\n" ..
+        forms.gettext(Waypoint1XTextBox) .. "\n" ..
+        forms.gettext(Waypoint1YTextBox) .. "\n" ..
+        forms.gettext(Waypoint1ZTextBox) .. "\n" ..
+
+        forms.gettext(Waypoint1X2TextBox) .. "\n" ..
+        forms.gettext(Waypoint1Y2TextBox) .. "\n" ..
+        forms.gettext(Waypoint1Z2TextBox) .. "\n" ..
+
+        forms.gettext(Waypoint2TitleTextBox) .. "\n" ..
+        forms.gettext(Waypoint2XTextBox) .. "\n" ..
+        forms.gettext(Waypoint2YTextBox) .. "\n" ..
+        forms.gettext(Waypoint2ZTextBox) .. "\n" ..
+
+        forms.gettext(Waypoint2X2TextBox) .. "\n" ..
+        forms.gettext(Waypoint2Y2TextBox) .. "\n" ..
+        forms.gettext(Waypoint2Z2TextBox))
+    handle:close()
+
+    console.log("Waypoint File Saved")
+end
+
+--User has clicked the "Open" button
+function OpenWaypoint1Button()
+    SavedVariables = { }
+
+    SavedVariables[0] = CheckboxWayline1
+    SavedVariables[1] = CheckboxWaypoint2
+    SavedVariables[2] = CheckboxWayline2
+
+    SavedVariables[3] = Waypoint1TitleTextBox
+    SavedVariables[4] = Waypoint1XTextBox
+    SavedVariables[5] = Waypoint1YTextBox
+    SavedVariables[6] = Waypoint1ZTextBox
+    SavedVariables[7] = Waypoint1X2TextBox
+    SavedVariables[8] = Waypoint1Y2TextBox
+    SavedVariables[9] = Waypoint1Z2TextBox
+    SavedVariables[10] = Waypoint2TitleTextBox
+    SavedVariables[11] = Waypoint2XTextBox
+    SavedVariables[12] = Waypoint2YTextBox
+    SavedVariables[13] = Waypoint2ZTextBox
+    SavedVariables[14] = Waypoint2X2TextBox
+    SavedVariables[15] = Waypoint2Y2TextBox
+    SavedVariables[16] = Waypoint2Z2TextBox
+
+    WaypointDirectory = forms.openfile()
+
+    local i = 0
+
+    for line in io.lines(WaypointDirectory) do
+
+        --console.log(line)
+        if i < 3 then
+            forms.setproperty(SavedVariables[i],"Checked",line)
+        else
+            forms.settext(SavedVariables[i], line)
+        end
+
+        i = i + 1
+    end
+end
+
+function SetWaypoint1Button()
+    forms.settext(Waypoint1XTextBox, PlayerX)
+    forms.settext(Waypoint1YTextBox, PlayerY)
+    forms.settext(Waypoint1ZTextBox, PlayerZ)
+end
+
+function SetWaypoint1Button2()
+    forms.settext(Waypoint1X2TextBox, PlayerX)
+    forms.settext(Waypoint1Y2TextBox, PlayerY)
+    forms.settext(Waypoint1Z2TextBox, PlayerZ)
+end
+
+function SetWaypoint2Button()
+    forms.settext(Waypoint2XTextBox, PlayerX)
+    forms.settext(Waypoint2YTextBox, PlayerY)
+    forms.settext(Waypoint2ZTextBox, PlayerZ)
+end
+
+function SetWaypoint2Button2()
+    forms.settext(Waypoint2X2TextBox, PlayerX)
+    forms.settext(Waypoint2Y2TextBox, PlayerY)
+    forms.settext(Waypoint2Z2TextBox, PlayerZ)
 end
 
 function SaveInputQueueStateButton()
-    local handle = io.open(forms.gettext(SaveInputQueueFileName)..os.date("_%Y-%m-%d_%H'%M'%S")..".que","w")
+    local handle = io.open("["..SelectedMode.."-"..SelectedEngine.."-"..SelectedCourse.."-"..SelectedPlayers.."p]_"..forms.gettext(SaveInputQueueFileName)..os.date("_[%Y-%m-%d_%H'%M'%S]")..".que","w")
     handle:write(forms.gettext(InputQueueTextBox))
     handle:close()
     console.log("Input Queue file saved")
@@ -252,7 +484,7 @@ function OpenInputQueueStateButton()
 
     if InputQueueDirectory ~= '' then
         for line in io.lines(InputQueueDirectory) do
-            console.log(line)
+            --console.log(line)
             LoadedFramesQueue[#LoadedFramesQueue+1] = line
         end
 
@@ -266,19 +498,16 @@ function OpenInputQueueStateButton()
             LoadedTableStr = LoadedTableStr .. LoadedFramesQueue[i]
             i = i +1
         end
-        -- Verify output to the console
-        -- console.log(LoadedTableStr)
+
         -- Output to the Main Window
         forms.settext(InputQueueTextBox, LoadedTableStr)
     end
 end
 
---WaypointsButton()
---forms.destroy(HudWindow)
-
 --Generate the User Interface
 ------------INPUTS ARE X,Y,WIDTH,HEIGHT  -- For Text Boxes: WIDTH, HEIGHT, "signed", X, Y-------
-MainWindow = forms.newform(905, 800, "Mario Kart 64 Automatic Transmission v1.30")
+WainWindowTitle = "Mario Kart 64 Automatic Transmission v2.0"
+MainWindow = forms.newform(905, 800, WainWindowTitle)
 
 -- Blank frames
 TextBoxBlankLeadingFrames = forms.textbox(MainWindow, "0", 20, 18, "UNSIGNED", 10, 5)
@@ -309,7 +538,6 @@ a[1] = "Straight"
 a[2] = "Turn"
 GlideDropdown = forms.dropdown(MainWindow, a, 235, 28, 60, 20)
 
-
 --Shroomslide options
 forms.label(MainWindow, "Shroom slide", 12, 57, 67, 14)
 forms.label(MainWindow, "parameters", 14, 68, 66, 14)
@@ -334,7 +562,6 @@ GenerateButtonHandle = forms.button(MainWindow, "Generate Input", GenerateButton
 forms.label(MainWindow, "INPUT CATALOG:", 166, 101, 110, 15)
 GeneratedTextBox = forms.textbox(MainWindow, "000001:|..|    0,    0,...........A......|#Comment", 408, 615, "", 1, 118, true, true,"BOTH")
 forms.setproperty(GeneratedTextBox, "MaxLength", "1000000000")
-
 
 --HUD window creation
 HUDButtonHandle = forms.button(MainWindow, "HUD Options", HudButton, 1, 735, 86, 23)
@@ -368,20 +595,32 @@ forms.label(MainWindow, "Coordinates:", 260, 739, 66, 23)
 --Populate the Frame Reference Table
 function PopulateFrameReference()
     local LoadFramecount = emu.framecount()
-    local i = 1 
+    local i = 1
+    local j = 1
+    local k = 1
     
     local input_queue = GetInputQueue()
-    console.log(input_queue)
+    --console.log(input_queue)
     
-    while i <= #input_queue do
+    while k <= #input_queue do
         local cur_line = input_queue[i]
-        local input_start = string.find(cur_line, "|")
+        if cur_line == nil then
+            k = k + 1
+        else
+
+            local input_start = string.find(cur_line, "|")
+            
+            if input_start ~= nil then
+                cur_line = string.sub(cur_line, input_start)
+                cur_line = string.format("%06i", (LoadFramecount + (j-1)*2)) .. ":" .. cur_line
+                j = j + 1
+            end
         
-        cur_line = string.sub(cur_line, input_start)
-        cur_line = string.format("%06i", (LoadFramecount + (i-1)*2)) .. ":" .. cur_line
-    
-        input_queue[i] = cur_line
-        i = i +1
+            input_queue[i] = cur_line
+        end
+        i = i + 1
+        k = k + 1
+
     end
     
     SetInputQueue(input_queue)
@@ -411,7 +650,6 @@ BooModeCheckbox = forms.checkbox(MainWindow, "Boo", 844,23)
 
 --Multi-Line Textbox for Input Queue
 forms.label(MainWindow, "INPUT QUEUE:", 576, 9, 150, 15)
---forms.label(MainWindow, "<-Format", 682, 26, 60, 18)
 forms.textbox(MainWindow, "Frame#:|rP| -XXX, -YYY,UDLRUDLRSZBAudrllr|#Mnemonic", 409, 20, "", 426, 24, true, true)
 InputQueueTextBox = forms.textbox(MainWindow, "000001:|..|    0,    0,...........A......|#Comment", 409, 690, "", 426, 43, true, true,"BOTH")
 forms.setproperty(InputQueueTextBox, "MaxLength", "1000000000")
@@ -446,6 +684,7 @@ function RecordButton()
 end
 
 RecordButtonHandle = forms.button(MainWindow, "Record Input", RecordButton, 334, 95, 77, 23)
+RecordMetricsCheckBox = forms.checkbox(MainWindow, "+ Metrics", 341, 77)
 
 function ClearQueue()
     InputQueue = nil
@@ -468,6 +707,10 @@ end
 AppendInputHandle = forms.button(MainWindow, ">>", AppendInputButton, 404, 200, 30, 23)
 
 -- Bot variables
+ItemBotState = -1
+ItemBotIteratorSave = -1
+ItemBotWantedItem = -1
+ExecuteItemBotButtonHandle = nil
 
 -- Item bot States:
 -- -1: not active
@@ -476,14 +719,6 @@ AppendInputHandle = forms.button(MainWindow, ">>", AppendInputButton, 404, 200, 
 -- 2: Waiting to see what item we got
 -- 3: advancing one input frame past the last time we tried
 -- 4. Successful cleanup
-
-ItemBotState = -1
-
-ItemBotIteratorSave = -1
-
-ItemBotWantedItem = -1
-
-ExecuteItemBotButtonHandle = nil
 
 function ExecuteItemBotButton()
     if (ItemBotState ~= -1) then
@@ -540,27 +775,78 @@ end
 
 loadstateEventHandle = event.onloadstate(load_state_handler, "load_state_handler")
 
+TimerAddr = 0x0DC598
+
+function ResetMetrics()
+    MetricOffGround = 0
+    MetricABspin = 0
+    MetricTotalXYDistance = 0
+    MetricAvgXYSpeed = 0
+    MetricTotalXYZDistance = 0
+    MetricAvgXYZSpeed = 0
+    PriorPlayerX = nil
+    PriorPlayerY = nil
+    PriorPlayerZ = nil
+    MetricMaxXYSpeed = 0
+    MetricMaxXYZSpeed = 0
+    MetricSumOfXYSpeed = 0
+    MetricSumOfXYZSpeed = 0
+    FramesSinceLoad = 0
+    MetricMT = 0
+    MetricSlide = 0
+    MetricShroomSlide = 0
+    LoadRaceTime = mainmemory.readfloat(TimerAddr, true)
+end
+
+--Instantiate metric variables
+ResetMetrics()
+
+event.onloadstate(ResetMetrics)
+
+--WHILE TRUE LOOP--WHILE TRUE LOOP--WHILE TRUE LOOP--WHILE TRUE LOOP--WHILE TRUE LOOP--WHILE TRUE LOOP--WHILE TRUE LOOP--WHILE TRUE LOOP--
 while true do
 
-    if Check_Time then
-        local TimerAddr = 0x0DC598
+    PlaceAddr = 0x1643BB
+    Place=mainmemory.read_u8(PlaceAddr)
 
-        Timer=mainmemory.readfloat(TimerAddr, true)
-        gui.text(0,0, "TIME ".. string.format("%.3f", Timer),"orange",0x50000000,"topright")
+    -- Dynamically consolidate game state details to be used when saving files
+    local ModeAddr = 0x0DC53F
+    local EngineAddr = 0x0DC54B
+    local CourseAddr = 0x0DC5A1
+    local PlayersAddr = 0x0DC53B
+
+    SelectedModeIndex = mainmemory.read_u8(ModeAddr)
+    SelectedEngineIndex = mainmemory.read_u8(EngineAddr)
+    SelectedCourseIndex = mainmemory.read_u8(CourseAddr)
+    --Check to console
+    --console.log(SelectedCourseIndex)
+    SelectedPlayers = mainmemory.read_u8(PlayersAddr)
+
+    SelectedMode = ModeArray[SelectedModeIndex+2]
+    SelectedEngine = EngineArray[SelectedEngineIndex+2]
+    SelectedCourse = CourseArray[SelectedCourseIndex+2]
+
+    forms.setproperty(MainWindow, "Text", WainWindowTitle.." ["..SelectedMode.."-"..SelectedEngine.."-"..SelectedCourse.."-"..SelectedPlayers.."p]")
+
+    -- Detect if this is a lag frame
+    isLag = emu.islagged()
+
+    Timer=mainmemory.readfloat(TimerAddr, true)
+
+    if Check_Time then
+        gui.text(client.borderwidth(),0, "TIME ".. string.format("%.2f", Timer),"orange",0x50000000,"topright")
     end
 
     if Check_LapPosition then
         local LapAddr = 0x164390
         local PathAddr = 0x163288
-        local PlaceAddr = 0x1643BB
 
         Lap=mainmemory.read_s32_be(LapAddr) + 1
         Path=mainmemory.read_s32_be(PathAddr)
-        Place=mainmemory.read_u8(PlaceAddr) + 1
-        gui.text(client.borderwidth()+client.bufferwidth()*.35,0, "LAP ".. Lap .. "/3, Path " .. Path .. ", Place " .. Place .. "/8",0xFFC758FF,0x50000000)
+        gui.text(client.borderwidth()+client.bufferwidth()*.1,0, "LAP ".. Lap .. "/3, Path " .. Path .. ", Place " .. (Place + 1) .. "/8",0xFFC758FF,0x50000000)
     end
-
-    if Check_Coordinates then
+    
+    --Instantiate position / velocity variables
         local Xaddr = 0x0F69A4
         local XvAddr = 0x0F69C4
         local Yaddr = 0x0F69AC
@@ -585,66 +871,71 @@ while true do
         -----Thus, to show coordinates in meters we must divide them by 18. This is helpful to do as then velocities and coordinates are provided in km/h and meters respectively
 
         PlayerX=mainmemory.readfloat(Xaddr, true) / Units
-        gui.text(0,17, "X ".. string.format("%.3f", PlayerX),"white","black","bottomleft")
         PlayerXv=mainmemory.readfloat(XvAddr, true) * 12
-        gui.text(0,2, "Xv ".. string.format("%.3f", PlayerXv),"white","black","bottomleft")
 
         PlayerY=mainmemory.readfloat(Yaddr, true) / Units
-        gui.text(120,17, "Y ".. string.format("%.3f", PlayerY),"white","black","bottomleft")
         PlayerYv=mainmemory.readfloat(YvAddr, true) * 12
-        gui.text(120,2, "Yv ".. string.format("%.3f", PlayerYv),"white","black","bottomleft")
 
         PlayerZ=mainmemory.readfloat(Zaddr, true) / Units
-        gui.text(240,17, "Z ".. string.format("%.3f", PlayerZ),"white","black","bottomleft")
         PlayerZv=mainmemory.readfloat(ZvAddr, true) * 12
+
+        XYspeed = math.sqrt (PlayerXv^2+PlayerYv^2)
+        XYZspeed = math.sqrt (PlayerXv^2+PlayerYv^2+PlayerZv^2)
+
+    if Check_Coordinates then
+        gui.text(0,17, "X ".. string.format("%.3f", PlayerX),"white","black","bottomleft")
+        gui.text(0,2, "Xv ".. string.format("%.3f", PlayerXv),"white","black","bottomleft")
+
+        gui.text(120,17, "Y ".. string.format("%.3f", PlayerY),"white","black","bottomleft")
+        gui.text(120,2, "Yv ".. string.format("%.3f", PlayerYv),"white","black","bottomleft")
+
+        gui.text(240,17, "Z ".. string.format("%.3f", PlayerZ),"white","black","bottomleft")
         gui.text(240,2, "Zv ".. string.format("%.3f", PlayerZv),"white","black","bottomleft")
 
-        gui.text(360,2, "XYZv " .. string.format("%.3f", math.sqrt (PlayerXv^2+PlayerYv^2+PlayerZv^2)) .. " km/h","white","black","bottomleft")
+        gui.text(360,2, "XYZv " .. string.format("%.3f", XYZspeed) .. " km/h","white","black","bottomleft")
 
         GroundHeight=mainmemory.readfloat(ZgroundAddr, true)
         PlayerHeight=mainmemory.readfloat(Zaddr, true)
         PlayerAGL=(PlayerHeight-GroundHeight-5.317) / Units
         gui.text(360,17, "Z[AGL] " .. string.format("%.2f", PlayerAGL),"white","black","bottomleft")
+
     end
     
     if Check_Rivals then
-
-        --Rivals
         local Rival1Addr = 0x163349
         local Rival2Addr = 0x16334B
 
-        characters = {
-            "Mario","Luigi","Yoshi","Toad","DK","Wario","Peach","Bowser"
-        }
+        characters = {"Mario","Luigi","Yoshi","Toad","DK","Wario","Peach","Bowser"}
 	
         Rival1=mainmemory.read_u8(Rival1Addr)
         Rival2=mainmemory.read_u8(Rival2Addr)
 
-        characters = {
-            "Mario","Luigi","Yoshi","Toad","DK","Wario","Peach","Bowser"
-        }
-
-        Rival1=mainmemory.read_u8(Rival1Addr)
-        Rival2=mainmemory.read_u8(Rival2Addr)
-
-        gui.text(536,17, "R1: " .. characters[Rival1+1],"yellow","black","bottomleft")
-        gui.text(536,2, "R2: " .. characters[Rival2+1],"yellow","black","bottomleft")
+        gui.text(client.borderwidth()+client.bufferwidth()*.5,0, "R1:" .. characters[Rival1+1] .. " R2:" .. characters[Rival2+1],"white","black","topleft")
     end
+
+    local StateCAddr = 0x0F6A4C
+    StateC=mainmemory.read_u8(StateCAddr)
+
+    local StateEAddr = 0x0F6A4E
+    StateE=mainmemory.read_u8(StateEAddr)
+
+    local StateFAddr = 0x0F6A4F
+    StateF=mainmemory.read_u8(StateFAddr)
+
+    local State5BAddr = 0x0F6A5B
+    State5B=mainmemory.read_u8(State5BAddr)
+
+    local MTglideAddr = 0x0F6BCB
+    MTglide=mainmemory.read_u8(MTglideAddr)
 
     if Check_SpeedState then
 
-        local MTglideAddr = 0x0F6BCB
-
-        MTglide=mainmemory.read_u8(MTglideAddr)
         if MTglide > 0 then
-            gui.text(client.screenwidth()*.5-30,client.screenheight()*.5 - 30, "MT " .. 31 - MTglide,"red")
+            gui.text(client.screenwidth()*.5-30,client.screenheight()*.5 - 30, "MT " .. (31 - MTglide),"red")
         end
 
-        local StateEAddr = 0x0F6A4E
-        StateE=mainmemory.read_u8(StateEAddr)
-
-        if bit.check(StateE,5) then
-            gui.text(client.screenwidth()*.5-50,client.screenheight()*.5 - 15, "SHROOMING","red")
+        if bit.check(StateF,3) then
+            gui.text(client.screenwidth()*.5-50,client.screenheight()*.5 - 15, "OFF GROUND","red")
         end
 
         --This speed address is what actually feeds the speedometer but it is only the XY velocity and also stops reporting after a race ends
@@ -652,27 +943,226 @@ while true do
         --Speed=mainmemory.readfloat(SpeedAddr, true)
         --I chose to calculate the velocity based on the XY velocity rather than reading the speedometer memory value
 
-        gui.text(client.screenwidth()*.5-60,client.screenheight()*.5, string.format("%.3f", math.sqrt (PlayerXv^2+PlayerYv^2)) .. " km/h","white","black")
-        
-        local StateFAddr = 0x0F6A4F
-        StateF=mainmemory.read_u8(StateFAddr)
+        SpeedometerText = string.format("%.3f", XYspeed).. " km/h"
 
+        gui.text(client.screenwidth()*.5-(5*(string.len(SpeedometerText))),client.screenheight()*.5, SpeedometerText,"white","black")
+        
         if bit.check(StateF,5) then
-            gui.text(client.screenwidth()*.5-60,client.screenheight()*.5 + 15, "AB SPINNING","red")
+            gui.text(client.screenwidth()*.5-55,client.screenheight()*.5 + 15, "AB SPINNING","red")
         end
 
-        if bit.check(StateF,3) then
-            gui.text(client.screenwidth()*.5-55,client.screenheight()*.5 + 30, "OFF GROUND","red")
+        if bit.check(StateE,5) then
+            gui.text(client.screenwidth()*.5-45,client.screenheight()*.5 + 30, "SHROOMING","red")
         end
     end
-    
-    -- Detect if this is a lag frame
-    isLag = emu.islagged()
-    
+   
+    if Check_MetricsState then
+
+        if (isLag == false) then
+            
+            if bit.check(StateF,3) then
+                MetricOffGround = MetricOffGround + 1
+            end
+
+            if bit.check(StateF,5) then
+                MetricABspin = MetricABspin + 1
+            end
+
+            if MTglide > 0 then
+                MetricMT = MetricMT + 1
+            end
+
+            if bit.check(StateF,4) and not bit.check(StateF,1) and not bit.check(StateF,3) then
+                
+                if bit.check(StateE,5) then
+                    MetricShroomSlide = MetricShroomSlide + 1
+                else
+                    MetricSlide = MetricSlide + 1
+                end
+            end
+
+            if (PriorPlayerX ~= nil) then
+                MetricTotalXYDistance = MetricTotalXYDistance + math.sqrt ((PriorPlayerX-PlayerX)^2+(PriorPlayerY-PlayerY)^2)
+                MetricTotalXYZDistance = MetricTotalXYZDistance + math.sqrt ((PriorPlayerX-PlayerX)^2+(PriorPlayerY-PlayerY)^2+(PriorPlayerZ-PlayerZ)^2)
+
+                if FramesSinceLoad < 1 then
+
+                    MetricAvgXYSpeed = XYspeed
+                    MetricMaxXYSpeed = MetricAvgXYSpeed
+                    MetricTotalXYDistance = 0
+                    MetricAvgXYZSpeed = XYZspeed
+                    MetricMaxXYZSpeed = MetricAvgXYZSpeed
+                    MetricTotalXYZDistance = 0
+                
+                elseif FramesSinceLoad >= 1 then
+
+                    if (Timer > LoadRaceTime) then
+                        -- Add check of Units to ensure it's 18
+                        MetricAvgXYSpeed = ((MetricTotalXYDistance / 1000) * (Units/18)) / ((Timer - LoadRaceTime) / (60 * 60))
+                        MetricAvgXYZSpeed = ((MetricTotalXYZDistance / 1000) * (Units/18))/ ((Timer - LoadRaceTime) / (60 * 60))
+                    end
+
+                    if MetricMaxXYSpeed < XYspeed then
+                        MetricMaxXYSpeed = XYspeed
+                    end
+
+                    if MetricMaxXYZSpeed < XYZspeed then
+                        MetricMaxXYZSpeed = XYZspeed
+                    end
+                end
+            end
+        end
+
+        -- Frames Off Ground:
+        gui.text(2, 90, "Off Ground:" .. MetricOffGround,"white","black","bottomright")
+        -- Frames AB spinning:
+        gui.text(2, 120, "AB Spin:" .. MetricABspin,"white","black","bottomright")
+        -- Frames of MT Glide:
+        gui.text(2, 105, "MT Glide:" .. MetricMT,"white","black","bottomright")
+        -- Time sliding (No Shroom):
+        gui.text(2, 75, "Slide:" .. MetricSlide,"white","black","bottomright")
+        -- Time shroom sliding:
+        gui.text(2, 60, "Shroomslide:" .. MetricShroomSlide,"white","black","bottomright")
+
+        -- Frames Σ Distance; Avg. Speed; Max Speed:
+        gui.text(2, 32, "Dist XY:" .. string.format("%.3f",MetricTotalXYDistance) .. " +Z:" .. string.format("%.3f",MetricTotalXYZDistance),"white","black","bottomright")
+        gui.text(2, 17, "Avg XYv:" .. string.format("%.3f",MetricAvgXYSpeed) .. " +Z:" .. string.format("%.3f",MetricAvgXYZSpeed),"white","black","bottomright")
+        gui.text(2, 2, "Max XYv:".. string.format("%.3f",MetricMaxXYSpeed) .. " +Z:" .. string.format("%.3f",MetricMaxXYZSpeed),"white","black","bottomright")
+    end
+
+    if forms.getproperty(WaypointsWindow,"WindowState") ~= "" then
+        -- Waypoint 1 Logic
+        Waypoint1X = tonumber(forms.gettext(Waypoint1XTextBox))
+        Waypoint1Y = tonumber(forms.gettext(Waypoint1YTextBox))
+        Waypoint1Z = tonumber(forms.gettext(Waypoint1ZTextBox))
+
+        Waypoint1XY = math.sqrt ((Waypoint1X-PlayerX)^2+(Waypoint1Y-PlayerY)^2)
+        forms.settext( Waypoint1XYTextBox, string.format("%.3f",Waypoint1XY))
+        --gui.text(240,2, "Zv ".. string.format("%.3f", PlayerZv),"white","black","bottomleft")
+
+        Waypoint1XYZ = math.sqrt ((Waypoint1X-PlayerX)^2+(Waypoint1Y-PlayerY)^2+(Waypoint1Z-PlayerZ)^2)
+        forms.settext(Waypoint1XYZTextBox, string.format("%.3f",Waypoint1XYZ))
+
+        if forms.ischecked(CheckboxWayline1) == false then
+
+            forms.setproperty(Waypoint1Cover2,"Visible",true)
+            forms.setproperty(SetWaypoint1Handle2,"Visible",false)
+        else
+            forms.setproperty(Waypoint1Cover2,"Visible",false)
+            forms.setproperty(SetWaypoint1Handle2,"Visible",true)
+
+            Waypoint1X2 = tonumber(forms.gettext(Waypoint1X2TextBox))
+            Waypoint1Y2 = tonumber(forms.gettext(Waypoint1Y2TextBox))
+            Waypoint1Z2 = tonumber(forms.gettext(Waypoint1Z2TextBox))
+        end
+
+        if forms.ischecked(CheckboxWaypoint2) == false then
+
+            forms.setsize(WaypointsWindow, 482, 182)
+            forms.setproperty(Waypoint2TitleTextBox,"Visible",false)
+        else
+            forms.setsize(WaypointsWindow, 482, 272)
+            forms.setproperty(Waypoint2TitleTextBox,"Visible",true)
+
+            -- Waypoint 2 Logic
+            Waypoint2X = tonumber(forms.gettext(Waypoint2XTextBox))
+            Waypoint2Y = tonumber(forms.gettext(Waypoint2YTextBox))
+            Waypoint2Z = tonumber(forms.gettext(Waypoint2ZTextBox))
+
+            Waypoint2XY = math.sqrt ((Waypoint2X-PlayerX)^2+(Waypoint2Y-PlayerY)^2)
+            forms.settext(Waypoint2XYTextBox, string.format("%.3f",Waypoint2XY))
+
+            Waypoint2XYZ = math.sqrt ((Waypoint2X-PlayerX)^2+(Waypoint2Y-PlayerY)^2+(Waypoint2Z-PlayerZ)^2)
+            forms.settext(Waypoint2XYZTextBox, string.format("%.3f",Waypoint2XYZ))
+        end
+
+        if forms.ischecked(CheckboxWayline2) == false then
+
+            forms.setproperty(Waypoint2Cover2,"Visible",true)
+            forms.setproperty(SetWaypoint2Handle2,"Visible",false)
+
+        else
+            forms.setproperty(Waypoint2Cover2,"Visible",false)
+            forms.setproperty(SetWaypoint2Handle2,"Visible",true)
+
+            Waypoint2X2 = tonumber(forms.gettext(Waypoint2X2TextBox))
+            Waypoint2Y2 = tonumber(forms.gettext(Waypoint2Y2TextBox))
+            Waypoint2Z2 = tonumber(forms.gettext(Waypoint2Z2TextBox))
+        end
+
+        --Waypoint HUD
+        if forms.ischecked(CheckboxWaypoint1OnScreen) == true then
+            gui.text(1, client.screenheight()*.15, forms.gettext(Waypoint1TitleTextBox),"white","black","topright")
+            gui.text(1, client.screenheight()*.15 + 15, "XY:" .. string.format("%.3f",Waypoint1XY),"white","black","topright")
+            gui.text(1, client.screenheight()*.15 + 30, "XYZ:" .. string.format("%.3f",Waypoint1XYZ),"gray","black","topright")
+        end
+
+        if ((forms.ischecked(CheckboxWaypoint2OnScreen) == true) and (forms.ischecked(CheckboxWaypoint2) == true)) then
+            gui.text(1, client.screenheight()*.15 + 55, forms.gettext(Waypoint2TitleTextBox),"white","black","topright")
+            gui.text(1, client.screenheight()*.15 + 70, "XY:" .. string.format("%.3f",Waypoint2XY),"white","black","topright")
+            gui.text(1, client.screenheight()*.15 + 85, "XYZ:" .. string.format("%.3f",Waypoint2XYZ),"gray","black","topright")
+        end 
+
+    end
+     
     if (RecordState == 1) then
         if (isLag == false) then
-            forms.settext(GeneratedTextBox, forms.gettext(GeneratedTextBox) .. movie.getinputasmnemonic(emu.framecount()-1) .. "\r\n")
+
+            --Option to store metrics as comments for recorded input
+            MetricComment = "#"
+
+            if forms.ischecked(RecordMetricsCheckBox) == true then
+
+                if bit.check(StateE,5) then
+                    MetricFlagShroom = "Shrm"
+                else
+                    MetricFlagShroom = "."
+                end
+
+                if bit.check(StateF,3) then
+                    MetricFlagAir = "Air"
+                else
+                    MetricFlagAir = "."
+                end
+
+                if bit.check(StateF,4) and not bit.check(StateF,1) and not bit.check(StateF,3) then
+                    MetricFlagSlide = "Sld"
+                else
+                    MetricFlagSlide = "."
+                end
+
+                if bit.check(StateE,0) then
+                    MetricFlagMT = "MT"
+                else
+                    MetricFlagMT = "."
+                end
+
+                if bit.check(StateF,5) then
+                    MetricFlagABSpin = "AB"
+                else
+                    MetricFlagABSpin = "."
+                end
+
+                if bit.check(State5B,0) or bit.check(State5B,1) or bit.check(State5B,3) or bit.check(State5B,7) then
+                    MetricFlagOoB = "OoB"
+                else
+                    MetricFlagOoB = "."
+                end
+
+                if bit.check(StateE,1) then
+                    MetricFlagStar = "Star"
+                else
+                    MetricFlagStar = "."
+                end
+
+                -- Time, Air, Sld, MT, Shrm, AB, OoB, Star, Speed, X, Y, Z
+                MetricComment = "#"..string.format("%.2f", Timer)..";"..MetricFlagAir..";"..MetricFlagSlide..";"..MetricFlagMT..";"..MetricFlagShroom..";"..MetricFlagABSpin..";"..MetricFlagOoB..";"..MetricFlagStar
+                ..";"..string.format("%.3f",XYspeed)..";"..string.format("%.3f",PlayerX)..";"..string.format("%.3f",PlayerY)..";"..string.format("%.3f",PlayerZ)
+            end
+
+            forms.settext(GeneratedTextBox, forms.gettext(GeneratedTextBox) .. string.format("%06i", emu.framecount()-1) .. ":" .. movie.getinputasmnemonic(emu.framecount()-1) .. MetricComment .. "\r\n")
         end
+
     elseif (InputQueue ~= nil) then
         if (isLag == false) then
             queueIterator = queueIterator + 1
@@ -682,19 +1172,21 @@ while true do
         
         if (queueIterator < table.getn(InputQueue) + 1) then
             toPut = bizstring.replace(InputQueue[queueIterator], "\n", "")
+
+            if (toPut ~= "") then
             
-            -- Remove the frame number and comments if present
-            local input_start = string.find(toPut, "|")
-            toPut = string.sub(toPut, input_start)
-            toPut = string.sub(toPut, 1, 35)
+                -- Remove the frame number and comments if present
+                local input_start = string.find(toPut, "|")
+                toPut = string.sub(toPut, input_start)
+                toPut = string.sub(toPut, 1, 35)
+            end
         else
             ClearQueue()
         end
         
         if (ItemBotState >= 0) then
-            if (toPut == "") then
+            if (queueIterator >= table.getn(InputQueue) + 1) then
                 -- We failed!
-                
                 -- print out a message?
                 console.log("Item bot ran out of queued input!")
                 
@@ -725,7 +1217,6 @@ while true do
                 elseif (ItemBotState == 1) then
                     if (isLag == false) then
                         -- We just successfully pressed Z
-
                         -- Change state to detection mode
                         ItemBotState = 2
                     end
@@ -733,14 +1224,22 @@ while true do
                 -- If waiting to see what item we got, check if its set yet, and if its what we want
                 elseif (ItemBotState == 2) then
                     item_we_got = memory.read_s8(0x165F5B)
+                    --TEST TO CONSOLE
+                    --console.log(item_we_got)
+                    console.log(itemOptions[item_we_got-1])
                     z_delay_timer = memory.read_u8(0x165F07)
 
                     if (item_we_got > 0 or (z_delay_timer == 255 and forms.ischecked(BooModeCheckbox))) then
                         if (item_we_got == ItemBotWantedItem) then
                             -- We succeeded
-                            
                             local to_edit = bizstring.replace(InputQueue[ItemBotIteratorSave], "\n", "")
-                            to_edit = string.sub(to_edit,0,25) .. "Z" .. string.sub(to_edit,27)
+
+                               
+                            -- Remove the frame number and comments if present
+                            local input_start = string.find(to_edit, "|")
+                            to_edit = string.sub(to_edit, input_start)
+                            to_edit = string.sub(to_edit,1,25) .. "Z" .. string.sub(to_edit,27)
+
                             InputQueue[ItemBotIteratorSave] = to_edit
                             SetInputQueue(InputQueue)
                             
@@ -795,9 +1294,56 @@ while true do
         
         if (toPut ~= "") then
             joypad.setfrommnemonicstr(toPut)
-        end
-        
+        end    
     end
+
+    --Consider moving these
+    PriorPlayerX = PlayerX
+    PriorPlayerY = PlayerY
+    PriorPlayerZ = PlayerZ
+
+    if (isLag == false) then
+        FramesSinceLoad = FramesSinceLoad + 1
+    end
+
+    -- --THIS SECTION IS INCOMPLETE, additional work is required to fully reverse engineer the RNGValue calculation
+    -- --Item prediction, http://beckabney.com/mk64/items.php and https://github.com/abitalive/MarioKart64/blob/master/Notes/item_rng.txt
+    -- --Formula: (RNGValue + ABRFrames + RaceFrames + LastItem) % 100
+    -- itemLookupAddr = 0x1A7A90
+    -- itemLookup = mainmemory.readbyterange(itemLookupAddr, 800)
+
+    -- --RNGValue
+    -- --0x802B7E34 RandomInt
+    -- --Returns a random number between 0 and (a0 - 1)
+    -- --NOTE THIS IS ACTUALLY THE ADDRESS OF THE RNG FUNCTION, it's result is stored directly into a register and so must be reverse engineered
+    -- RNGValueAddr = 0x2B7E34
+    -- RNGValue = mainmemory.read_u8(RNGValueAddr)
+
+    -- --ABRFrames
+    -- --0x801658FF 1b ButtonCounter
+    -- --Increments by 1 each frame A/B/R are held on any active controller during a race
+    -- --Increments by more than 1 if multiple buttons are held
+    -- --Maxes at 255 then loops back to 0
+    -- ABRFramesAddr = 0x1658FF
+    -- ABRFrames = mainmemory.read_u8(ABRFramesAddr)
+
+    -- --RaceFrames
+    -- --0x8018D3FC 4b RaceTimer
+    -- --Increments by 1 each frame during a race
+    -- RaceFramesAddr = 0x18D3FC
+    -- RaceFrames = mainmemory.read_s32_be(RaceFramesAddr)
+
+    -- --LastItem
+    -- --0x801658FD 1b ItemRandom
+    -- --Random number between 0 and 99
+    -- LastItemAddr = 0x1658FD
+    -- LastItem = mainmemory.read_u8(LastItemAddr)
+
+    -- ItemID = (RNGValue + ABRFrames + RaceFrames + LastItem) % 100
+    -- ItemID = ItemID + (100 * Place)
+    -- PredictedItem = itemLookup[ItemID]
+
+    -- gui.text(client.borderwidth()+client.bufferwidth()*.25,client.borderwidth()+client.bufferwidth()*.25, "ItemID: "..ItemID..", Item: "..PredictedItem,0xFFC758FF,0x50000000)
 
     emu.frameadvance()
 end
