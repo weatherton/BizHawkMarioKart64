@@ -834,7 +834,7 @@ while true do
     Timer=mainmemory.readfloat(TimerAddr, true)
 
     if Check_Time then
-        gui.text(client.borderwidth(),0, "TIME ".. string.format("%.2f", Timer),"orange",0x50000000,"topright")
+        gui.text(client.borderwidth(),0, "TIME ".. string.format("%.2f", Timer),"orange","topright")
     end
 
     if Check_LapPosition then
@@ -843,7 +843,7 @@ while true do
 
         Lap=mainmemory.read_s32_be(LapAddr) + 1
         Path=mainmemory.read_s32_be(PathAddr)
-        gui.text(client.borderwidth()+client.bufferwidth()*.1,0, "LAP ".. Lap .. "/3, Path " .. Path .. ", Place " .. (Place + 1) .. "/8",0xFFC758FF,0x50000000)
+        gui.text(client.borderwidth()+client.bufferwidth()*.1,0, "LAP ".. Lap .. "/3, Path " .. Path .. ", Place " .. (Place + 1) .. "/8",0xFFC758FF)
     end
     
     --Instantiate position / velocity variables
@@ -883,21 +883,21 @@ while true do
         XYZspeed = math.sqrt (PlayerXv^2+PlayerYv^2+PlayerZv^2)
 
     if Check_Coordinates then
-        gui.text(0,17, "X ".. string.format("%.3f", PlayerX),"white","black","bottomleft")
-        gui.text(0,2, "Xv ".. string.format("%.3f", PlayerXv),"white","black","bottomleft")
+        gui.text(0,17, "X ".. string.format("%.3f", PlayerX),"white","bottomleft")
+        gui.text(0,2, "Xv ".. string.format("%.3f", PlayerXv),"white","bottomleft")
 
-        gui.text(120,17, "Y ".. string.format("%.3f", PlayerY),"white","black","bottomleft")
-        gui.text(120,2, "Yv ".. string.format("%.3f", PlayerYv),"white","black","bottomleft")
+        gui.text(120,17, "Y ".. string.format("%.3f", PlayerY),"white","bottomleft")
+        gui.text(120,2, "Yv ".. string.format("%.3f", PlayerYv),"white","bottomleft")
 
-        gui.text(240,17, "Z ".. string.format("%.3f", PlayerZ),"white","black","bottomleft")
-        gui.text(240,2, "Zv ".. string.format("%.3f", PlayerZv),"white","black","bottomleft")
+        gui.text(240,17, "Z ".. string.format("%.3f", PlayerZ),"white","bottomleft")
+        gui.text(240,2, "Zv ".. string.format("%.3f", PlayerZv),"white","bottomleft")
 
-        gui.text(360,2, "XYZv " .. string.format("%.3f", XYZspeed) .. " km/h","white","black","bottomleft")
+        gui.text(360,2, "XYZv " .. string.format("%.3f", XYZspeed) .. " km/h","white","bottomleft")
 
         GroundHeight=mainmemory.readfloat(ZgroundAddr, true)
         PlayerHeight=mainmemory.readfloat(Zaddr, true)
         PlayerAGL=(PlayerHeight-GroundHeight-5.317) / Units
-        gui.text(360,17, "Z[AGL] " .. string.format("%.2f", PlayerAGL),"white","black","bottomleft")
+        gui.text(360,17, "Z[AGL] " .. string.format("%.2f", PlayerAGL),"white","bottomleft")
 
     end
     
@@ -910,7 +910,7 @@ while true do
         Rival1=mainmemory.read_u8(Rival1Addr)
         Rival2=mainmemory.read_u8(Rival2Addr)
 
-        gui.text(client.borderwidth()+client.bufferwidth()*.5,0, "R1:" .. characters[Rival1+1] .. " R2:" .. characters[Rival2+1],"white","black","topleft")
+        gui.text(client.borderwidth()+client.bufferwidth()*.5,0, "R1:" .. characters[Rival1+1] .. " R2:" .. characters[Rival2+1],"white","topleft")
     end
 
     local StateCAddr = 0x0F6A4C
@@ -1014,20 +1014,20 @@ while true do
         end
 
         -- Frames Off Ground:
-        gui.text(2, 90, "Off Ground:" .. MetricOffGround,"white","black","bottomright")
+        gui.text(2, 90, "Off Ground:" .. MetricOffGround,"white","bottomright")
         -- Frames AB spinning:
-        gui.text(2, 120, "AB Spin:" .. MetricABspin,"white","black","bottomright")
+        gui.text(2, 120, "AB Spin:" .. MetricABspin,"white","bottomright")
         -- Frames of MT Glide:
-        gui.text(2, 105, "MT Glide:" .. MetricMT,"white","black","bottomright")
+        gui.text(2, 105, "MT Glide:" .. MetricMT,"white","bottomright")
         -- Time sliding (No Shroom):
-        gui.text(2, 75, "Slide:" .. MetricSlide,"white","black","bottomright")
+        gui.text(2, 75, "Slide:" .. MetricSlide,"white","bottomright")
         -- Time shroom sliding:
-        gui.text(2, 60, "Shroomslide:" .. MetricShroomSlide,"white","black","bottomright")
+        gui.text(2, 60, "Shroomslide:" .. MetricShroomSlide,"white","bottomright")
 
         -- Frames Σ Distance; Avg. Speed; Max Speed:
-        gui.text(2, 32, "Dist XY:" .. string.format("%.3f",MetricTotalXYDistance) .. " +Z:" .. string.format("%.3f",MetricTotalXYZDistance),"white","black","bottomright")
-        gui.text(2, 17, "Avg XYv:" .. string.format("%.3f",MetricAvgXYSpeed) .. " +Z:" .. string.format("%.3f",MetricAvgXYZSpeed),"white","black","bottomright")
-        gui.text(2, 2, "Max XYv:".. string.format("%.3f",MetricMaxXYSpeed) .. " +Z:" .. string.format("%.3f",MetricMaxXYZSpeed),"white","black","bottomright")
+        gui.text(2, 32, "Dist XY:" .. string.format("%.3f",MetricTotalXYDistance) .. " +Z:" .. string.format("%.3f",MetricTotalXYZDistance),"white","bottomright")
+        gui.text(2, 17, "Avg XYv:" .. string.format("%.3f",MetricAvgXYSpeed) .. " +Z:" .. string.format("%.3f",MetricAvgXYZSpeed),"white","bottomright")
+        gui.text(2, 2, "Max XYv:".. string.format("%.3f",MetricMaxXYSpeed) .. " +Z:" .. string.format("%.3f",MetricMaxXYZSpeed),"white","bottomright")
     end
 
     if forms.getproperty(WaypointsWindow,"WindowState") ~= "" then
@@ -1038,7 +1038,7 @@ while true do
 
         Waypoint1XY = math.sqrt ((Waypoint1X-PlayerX)^2+(Waypoint1Y-PlayerY)^2)
         forms.settext( Waypoint1XYTextBox, string.format("%.3f",Waypoint1XY))
-        --gui.text(240,2, "Zv ".. string.format("%.3f", PlayerZv),"white","black","bottomleft")
+        --gui.text(240,2, "Zv ".. string.format("%.3f", PlayerZv),"white","bottomleft")
 
         Waypoint1XYZ = math.sqrt ((Waypoint1X-PlayerX)^2+(Waypoint1Y-PlayerY)^2+(Waypoint1Z-PlayerZ)^2)
         forms.settext(Waypoint1XYZTextBox, string.format("%.3f",Waypoint1XYZ))
@@ -1092,15 +1092,15 @@ while true do
 
         --Waypoint HUD
         if forms.ischecked(CheckboxWaypoint1OnScreen) == true then
-            gui.text(1, client.screenheight()*.15, forms.gettext(Waypoint1TitleTextBox),"white","black","topright")
-            gui.text(1, client.screenheight()*.15 + 15, "XY:" .. string.format("%.3f",Waypoint1XY),"white","black","topright")
-            gui.text(1, client.screenheight()*.15 + 30, "XYZ:" .. string.format("%.3f",Waypoint1XYZ),"gray","black","topright")
+            gui.text(1, client.screenheight()*.15, forms.gettext(Waypoint1TitleTextBox),"white","topright")
+            gui.text(1, client.screenheight()*.15 + 15, "XY:" .. string.format("%.3f",Waypoint1XY),"white","topright")
+            gui.text(1, client.screenheight()*.15 + 30, "XYZ:" .. string.format("%.3f",Waypoint1XYZ),"gray","topright")
         end
 
         if ((forms.ischecked(CheckboxWaypoint2OnScreen) == true) and (forms.ischecked(CheckboxWaypoint2) == true)) then
-            gui.text(1, client.screenheight()*.15 + 55, forms.gettext(Waypoint2TitleTextBox),"white","black","topright")
-            gui.text(1, client.screenheight()*.15 + 70, "XY:" .. string.format("%.3f",Waypoint2XY),"white","black","topright")
-            gui.text(1, client.screenheight()*.15 + 85, "XYZ:" .. string.format("%.3f",Waypoint2XYZ),"gray","black","topright")
+            gui.text(1, client.screenheight()*.15 + 55, forms.gettext(Waypoint2TitleTextBox),"white","topright")
+            gui.text(1, client.screenheight()*.15 + 70, "XY:" .. string.format("%.3f",Waypoint2XY),"white","topright")
+            gui.text(1, client.screenheight()*.15 + 85, "XYZ:" .. string.format("%.3f",Waypoint2XYZ),"gray","topright")
         end 
 
     end
@@ -1159,8 +1159,8 @@ while true do
                 MetricComment = "#"..string.format("%.2f", Timer)..";"..MetricFlagAir..";"..MetricFlagSlide..";"..MetricFlagMT..";"..MetricFlagShroom..";"..MetricFlagABSpin..";"..MetricFlagOoB..";"..MetricFlagStar
                 ..";"..string.format("%.3f",XYspeed)..";"..string.format("%.3f",PlayerX)..";"..string.format("%.3f",PlayerY)..";"..string.format("%.3f",PlayerZ)
             end
-
-            forms.settext(GeneratedTextBox, forms.gettext(GeneratedTextBox) .. string.format("%06i", emu.framecount()-1) .. ":" .. movie.getinputasmnemonic(emu.framecount()-1) .. MetricComment .. "\r\n")
+--workingrighthere
+            forms.settext(GeneratedTextBox, forms.gettext(GeneratedTextBox) .. string.format("%06i", emu.framecount()-1) .. ":" .. string.sub(movie.getinputasmnemonic(emu.framecount()-1), 1, 35) .. MetricComment .. "\r\n")
         end
 
     elseif (InputQueue ~= nil) then
@@ -1177,8 +1177,8 @@ while true do
             
                 -- Remove the frame number and comments if present
                 local input_start = string.find(toPut, "|")
-                toPut = string.sub(toPut, input_start)
-                toPut = string.sub(toPut, 1, 35)
+                --Append players 2 and 3 input
+                toPut = string.sub(toPut, input_start, input_start + 34) .. "    0,    0,..................|    0,    0,..................|    0,    0,..................|"
             end
         else
             ClearQueue()
@@ -1343,7 +1343,7 @@ while true do
     -- ItemID = ItemID + (100 * Place)
     -- PredictedItem = itemLookup[ItemID]
 
-    -- gui.text(client.borderwidth()+client.bufferwidth()*.25,client.borderwidth()+client.bufferwidth()*.25, "ItemID: "..ItemID..", Item: "..PredictedItem,0xFFC758FF,0x50000000)
+    -- gui.text(client.borderwidth()+client.bufferwidth()*.25,client.borderwidth()+client.bufferwidth()*.25, "ItemID: "..ItemID..", Item: "..PredictedItem,0xFFC758FF)
 
     emu.frameadvance()
 end
