@@ -3,7 +3,7 @@
 console.clear()
 
 function GetInputQueue()
-    return bizstring.split(forms.gettext(InputQueueTextBox), "\r\n")
+    return bizstring.split(forms.gettext(InputQueueTextBox), "\n")
 end
 
 function SetInputQueue(table_data)
@@ -587,8 +587,8 @@ forms.setproperty(QueueJournalingCheckBox,"Checked",true)
 
 --Coordinate Units
 a = { }
-a[1] = " Meters"
-a[2] = "Game Units"
+a[1] = "Game Units"
+a[2] = "Meters"
 UnitsDropdown = forms.dropdown(MainWindow, a, 325, 735, 85, 23)
 forms.label(MainWindow, "Coordinates:", 260, 739, 66, 23)
 
@@ -857,7 +857,7 @@ while true do
 
         UnitsChoice = forms.gettext(UnitsDropdown)
 
-        if UnitsChoice == " Meters" then
+        if UnitsChoice == "Meters" then
             Units = 18
         else
             Units = 1
@@ -871,13 +871,13 @@ while true do
         -----Thus, to show coordinates in meters we must divide them by 18. This is helpful to do as then velocities and coordinates are provided in km/h and meters respectively
 
         PlayerX=mainmemory.readfloat(Xaddr, true) / Units
-        PlayerXv=mainmemory.readfloat(XvAddr, true) * 12
+        PlayerXv=mainmemory.readfloat(XvAddr, true)-- * 12
 
         PlayerY=mainmemory.readfloat(Yaddr, true) / Units
-        PlayerYv=mainmemory.readfloat(YvAddr, true) * 12
+        PlayerYv=mainmemory.readfloat(YvAddr, true)-- * 12
 
         PlayerZ=mainmemory.readfloat(Zaddr, true) / Units
-        PlayerZv=mainmemory.readfloat(ZvAddr, true) * 12
+        PlayerZv=mainmemory.readfloat(ZvAddr, true)-- * 12
 
         XYspeed = math.sqrt (PlayerXv^2+PlayerYv^2)
         XYZspeed = math.sqrt (PlayerXv^2+PlayerYv^2+PlayerZv^2)
@@ -885,9 +885,15 @@ while true do
     if Check_Coordinates then
         gui.text(0,17, "X ".. string.format("%.3f", PlayerX),"white","bottomleft")
         gui.text(0,2, "Xv ".. string.format("%.3f", PlayerXv),"white","bottomleft")
+        gui.text(0,32, "X+ ".. string.format("%.3f", PlayerX+PlayerXv),"white","bottomleft")
+        gui.text(0,47, "X++ ".. string.format("%.3f", PlayerX+2*PlayerXv),"white","bottomleft")
+        gui.text(0,62, "Xgoal ".. string.format("%.3f", 262.25),"white","bottomleft")
 
         gui.text(120,17, "Y ".. string.format("%.3f", PlayerY),"white","bottomleft")
         gui.text(120,2, "Yv ".. string.format("%.3f", PlayerYv),"white","bottomleft")
+        gui.text(120,32, "Y+ ".. string.format("%.3f", PlayerY+PlayerYv),"white","bottomleft")
+		gui.text(120,47, "Y++ ".. string.format("%.3f", PlayerY+2*PlayerYv),"white","bottomleft")
+		gui.text(120,62, "Ygoal ".. string.format("%.3f", 344.5),"white","bottomleft")
 
         gui.text(240,17, "Z ".. string.format("%.3f", PlayerZ),"white","bottomleft")
         gui.text(240,2, "Zv ".. string.format("%.3f", PlayerZv),"white","bottomleft")
@@ -1176,7 +1182,7 @@ while true do
             if (toPut ~= "") then
             
                 -- Remove the frame number and comments if present
-                local input_start = string.find(toPut, "|")
+                local input_start = 8--string.find(toPut, "|")
                 --Append players 2 and 3 input
                 toPut = string.sub(toPut, input_start, input_start + 34) .. "    0,    0,..................|    0,    0,..................|    0,    0,..................|"
             end
